@@ -1,0 +1,31 @@
+/* src/style.css */
+@import "tailwindcss"; /* 👈 Tailwind v4 的正确导入方式 */
+
+/* 自定义全局暗黑 RPG 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* 呼吸灯发光动效 */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(244, 63, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+  }
+}
+
+.selected-glow {
+  animation: pulse-glow 2s infinite;
+}
