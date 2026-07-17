@@ -5,21 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "check:assets": "node scripts/validate-assets.mjs",
+    "typecheck": "vue-tsc --noEmit",
     "build": "vite build",
+    "check": "npm run check:assets && npm run typecheck && npm run build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.18.1",
     "vue": "^3.5.39"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.2",
     "@types/node": "^24.13.2",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
-    "autoprefixer": "^10.5.2",
-    "postcss": "^8.5.16",
-    "tailwindcss": "^4.3.2",
     "typescript": "~6.0.2",
     "vite": "^8.1.1",
     "vue-tsc": "^3.3.5"

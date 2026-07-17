@@ -1,0 +1,278 @@
+{
+  "schema_version": "1.0",
+  "provider": {
+    "name": "Game-icons.net",
+    "url": "https://game-icons.net/",
+    "licensing_url": "https://game-icons.net/about.html"
+  },
+  "licenses": {
+    "CC-BY-3.0": {
+      "name": "Creative Commons Attribution 3.0 Unported",
+      "url": "https://creativecommons.org/licenses/by/3.0/",
+      "legal_code_url": "https://creativecommons.org/licenses/by/3.0/legalcode"
+    }
+  },
+  "assets": [
+    {
+      "path": "/assets/vendor/game-icons/darkzaitzev/fried-fish.svg",
+      "title": "Fried fish",
+      "author": "DarkZaitzev",
+      "source_url": "https://game-icons.net/1x1/darkzaitzev/fried-fish.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/barbarian.svg",
+      "title": "Barbarian",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/barbarian.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/bolt-bomb.svg",
+      "title": "Bolt bomb",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/bolt-bomb.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/bow-arrow.svg",
+      "title": "Bow arrow",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/bow-arrow.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/cape.svg",
+      "title": "Cape",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/cape.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/cleopatra.svg",
+      "title": "Cleopatra",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/cleopatra.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/log.svg",
+      "title": "Log",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/log.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/mushrooms.svg",
+      "title": "Mushrooms",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/mushrooms.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/olive.svg",
+      "title": "Olive",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/olive.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/pirate-captain.svg",
+      "title": "Pirate captain",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/pirate-captain.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/tribal-gear.svg",
+      "title": "Tribal gear",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/tribal-gear.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/tribal-shield.svg",
+      "title": "Tribal shield",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/tribal-shield.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/vampire-dracula.svg",
+      "title": "Vampire Dracula",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/vampire-dracula.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/wizard-face.svg",
+      "title": "Wizard face",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/wizard-face.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/woman-elf-face.svg",
+      "title": "Female elf face",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/woman-elf-face.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/crossed-swords.svg",
+      "title": "Crossed swords",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/crossed-swords.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/crystal-bars.svg",
+      "title": "Crystal bars",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/crystal-bars.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/crystal-growth.svg",
+      "title": "Crystal growth",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/crystal-growth.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/crystal-wand.svg",
+      "title": "Crystal wand",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/crystal-wand.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/fire-bomb.svg",
+      "title": "Fire bomb",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/fire-bomb.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/ice-bomb.svg",
+      "title": "Ice bomb",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/ice-bomb.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/plastron.svg",
+      "title": "Plastron",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/lorc/originals/plastron.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/potion-ball.svg",
+      "title": "Potion ball",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/potion-ball.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/robe.svg",
+      "title": "Robe",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/robe.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/rock.svg",
+      "title": "Rock",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/rock.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/round-bottom-flask.svg",
+      "title": "Round bottom flask",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/round-bottom-flask.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/wizard-staff.svg",
+      "title": "Wizard staff",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/wizard-staff.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lucasms/shirt.svg",
+      "title": "Shirt",
+      "author": "Lucas",
+      "source_url": "https://game-icons.net/1x1/lucasms/shirt.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/skoll/gladius.svg",
+      "title": "Gladius",
+      "author": "Skoll",
+      "source_url": "https://game-icons.net/1x1/skoll/gladius.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    }
+  ]
+}
