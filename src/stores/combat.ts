@@ -6,7 +6,7 @@ import type {
   CombatServerEvent,
   CombatSnapshot,
   CombatantView,
-  NpcCombatStartResponse,
+  CombatStartResponse,
   PrepMessage,
 } from '../contracts'
 import { useNotificationsStore } from './notifications'
@@ -132,7 +132,7 @@ async function joinPvp(targetRoomId: string): Promise<boolean> {
   }
 }
 
-async function startNpcBattle(response: NpcCombatStartResponse): Promise<boolean> {
+async function startEncounterBattle(response: CombatStartResponse): Promise<boolean> {
   resetRoom()
   roomId.value = response.room_id
   applySnapshot(response.snapshot)
@@ -141,10 +141,12 @@ async function startNpcBattle(response: NpcCombatStartResponse): Promise<boolean
     return true
   } catch (error) {
     resetRoom()
-    useNotificationsStore().capture(error, 'NPC 战斗连接失败。', true)
+    useNotificationsStore().capture(error, '遭遇战连接失败。', true)
     return false
   }
 }
+
+const startNpcBattle = startEncounterBattle
 
 function submitPrep(payload: Omit<PrepMessage, 'action'>): void {
   try {
@@ -212,6 +214,7 @@ export function useCombatStore() {
     createPvp,
     joinPvp,
     startNpcBattle,
+    startEncounterBattle,
     submitPrep,
     submitAction,
     leaveRoom: resetRoom,

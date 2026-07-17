@@ -1,6 +1,7 @@
 import type { ArmorDefinition, CharacterDefinition, ConsumableDefinition, WeaponDefinition } from './catalog'
 import type { GameMode, Inventory } from './common'
 import type { NpcRelationship, PublicNpc } from './npc'
+import type { MonsterDefinition } from './exploration'
 
 export interface CombatState {
   environment: string | null
@@ -40,6 +41,8 @@ export interface CombatSnapshot {
   state: CombatState
   combat_log: string
   npc_enemy: (PublicNpc & { relationship: NpcRelationship }) | null
+  monster_enemy: MonsterDefinition | null
+  reward_summary: string | null
 }
 
 export interface PrepMessage {
@@ -66,12 +69,14 @@ export interface CreateRoomResponse { room_id: string }
 export interface JoinRoomResponse { room_id: string; mode: 'PvP' }
 export interface AddAiResponse { room_id: string; mode: 'PvE' }
 
-export interface NpcCombatStartResponse {
+export interface CombatStartResponse {
   status: 'success'
   room_id: string
   websocket_path: string
   snapshot: CombatSnapshot
 }
+
+export type NpcCombatStartResponse = CombatStartResponse
 
 export interface CombatantView {
   id: string | null

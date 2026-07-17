@@ -9,6 +9,10 @@
       <div class="coin-purse"><span>◈</span><strong>{{ profile?.gold ?? 0 }}</strong><small>可用金币</small></div>
     </div>
 
+    <article v-if="!exploration.shopAvailable.value" class="world-event world-event--danger">
+      <span>🔒</span><div><p class="eyebrow">MARKET CLOSED</p><h3>商会当前不接受交易</h3><p>{{ exploration.state.value?.actions.shop.reason ?? '请先在白天抵达村庄或城镇。' }}</p></div>
+    </article>
+
     <nav class="segmented" aria-label="商店分类">
       <button v-for="tab in tabs" :key="tab.id" type="button" :class="{ active: activeTab === tab.id }" @click="activeTab = tab.id">
         {{ tab.label }}
@@ -24,10 +28,10 @@
           <small>持有 {{ item.owned }}</small>
         </div>
         <div class="shop-row__actions">
-          <button class="button button--gold" type="button" :disabled="!canBuy(item) || player.busy.value" @click="trade('buy', item)">
+          <button class="button button--gold" type="button" :disabled="!exploration.shopAvailable.value || !canBuy(item) || player.busy.value" @click="trade('buy', item)">
             买入 <b>◈ {{ item.value }}</b>
           </button>
-          <button class="button button--ghost" type="button" :disabled="!canSell(item) || player.busy.value" @click="trade('sell', item)">
+          <button class="button button--ghost" type="button" :disabled="!exploration.shopAvailable.value || !canSell(item) || player.busy.value" @click="trade('sell', item)">
             售出 <b>商会结算</b>
           </button>
         </div>
@@ -43,12 +47,14 @@ import { computed, ref } from 'vue'
 import type { ItemType } from '../../contracts'
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCatalogStore } from '../../stores/catalog'
+import { useExplorationStore } from '../../stores/exploration'
 import { usePlayerStore } from '../../stores/player'
 
 interface ShopItem { id: string; type: ItemType; name: string; desc: string; value: number; owned: number; icon: string; imageUrl?: string }
 
 const player = usePlayerStore()
 const catalog = useCatalogStore()
+const exploration = useExplorationStore()
 const profile = player.profile
 const activeTab = ref<ItemType>('weapon')
 const tabs: Array<{ id: ItemType; label: string }> = [

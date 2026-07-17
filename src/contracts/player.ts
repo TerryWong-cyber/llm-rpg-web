@@ -7,7 +7,12 @@ export interface PlayerProfile {
   character_id: string
   gold: number
   inventory: Inventory
+  stamina: number
+  max_stamina: number
+  world_seed?: number | null
   current_map: MapInstance | null
+  world_maps?: Record<string, MapInstance>
+  last_camped_game_day?: number | null
 }
 
 export interface CreateCharacterRequest {

@@ -5,6 +5,7 @@ export interface PublicNpc {
   gender: string
   race: string
   appearance: string
+  image_url: string | null
   location: {
     region: string
     terrain_id: string | null
@@ -14,6 +15,13 @@ export interface PublicNpc {
   personality: string[]
   conversation_style: string
   public_backstory: string
+  equipment: {
+    weapon_id: string | null
+    armor_id: string | null
+    items: string[]
+  }
+  story_hooks: StoryHook[]
+  combat_tactics: string[]
   has_combat_profile: boolean
   combat_threat: number | null
 }

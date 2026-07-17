@@ -52,6 +52,7 @@ export interface ConsumableDefinition {
   name: string
   type: 'heal_hp' | 'heal_mp' | 'heal_both' | 'dmg'
   val: number
+  stamina_restore?: number
   value: number
   desc: string
   image_url?: string
@@ -62,6 +63,8 @@ export interface ResourceDefinition {
   id: CatalogId
   name: string
   emoji: string
+  category?: 'wood' | 'plant' | 'mineral' | 'creature' | 'aquatic' | 'arcane' | 'regional' | 'relic'
+  rarity?: 'common' | 'uncommon' | 'rare'
   value: number
   desc?: string
   image_url?: string

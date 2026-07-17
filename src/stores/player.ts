@@ -3,6 +3,7 @@ import * as gameApi from '../api/game'
 import type {
   CombatSnapshot,
   CraftResponse,
+  ExplorationPlayerState,
   ItemType,
   MapInstance,
   PlayerProfile,
@@ -139,12 +140,25 @@ async function craftItems(
   }
 }
 
-function syncExploration(map: MapInstance, materials: Record<string, number>): void {
+function syncExploration(
+  map: MapInstance,
+  materials: Record<string, number>,
+  explorationPlayer?: ExplorationPlayerState,
+): void {
   if (!profile.value) return
   replaceProfile({
     ...profile.value,
     current_map: map,
-    inventory: { ...profile.value.inventory, materials: { ...materials } },
+    stamina: explorationPlayer?.stamina ?? profile.value.stamina,
+    max_stamina: explorationPlayer?.max_stamina ?? profile.value.max_stamina,
+    last_camped_game_day: explorationPlayer?.last_camped_game_day ?? profile.value.last_camped_game_day,
+    inventory: {
+      ...profile.value.inventory,
+      materials: { ...materials },
+      items: explorationPlayer?.inventory_items
+        ? { ...explorationPlayer.inventory_items }
+        : profile.value.inventory.items,
+    },
   })
 }
 

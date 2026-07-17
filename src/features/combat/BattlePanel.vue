@@ -19,7 +19,7 @@
         <pre>{{ snapshot.combat_log || '战场尚未留下新的记录。' }}</pre>
 
         <div v-if="snapshot.game_over" class="battle-finished">
-          <span>✦</span><h3>战斗已经结束</h3><p>最终快照已同步金币与行囊。返回营地后可继续探索。</p>
+          <span>✦</span><h3>战斗已经结束</h3><p>{{ snapshot.reward_summary || '最终快照已同步金币与行囊。返回营地后可继续探索。' }}</p>
           <button class="button button--primary" type="button" @click="combat.leaveRoom">返回冒险营地</button>
         </div>
 
@@ -34,10 +34,11 @@
       </article>
 
       <article class="combatant-card combatant-card--enemy">
-        <div class="combatant-card__identity"><span>{{ snapshot.npc_enemy ? snapshot.npc_enemy.name.slice(0, 1) : '敌' }}</span><div><p class="eyebrow">{{ snapshot.npc_enemy?.title || 'OPPONENT' }}</p><h2>{{ snapshot.npc_enemy?.name || enemy?.class?.name || '未知敌人' }}</h2><small>{{ enemy?.status || '状态未知' }}</small></div></div>
+        <div class="combatant-card__identity"><span>{{ snapshot.monster_enemy?.emoji || (snapshot.npc_enemy ? snapshot.npc_enemy.name.slice(0, 1) : '敌') }}</span><div><p class="eyebrow">{{ snapshot.monster_enemy?.title || snapshot.npc_enemy?.title || 'OPPONENT' }}</p><h2>{{ snapshot.monster_enemy?.name || snapshot.npc_enemy?.name || enemy?.class?.name || '未知敌人' }}</h2><small>{{ enemy?.status || '状态未知' }}</small></div></div>
         <StatBar label="生命" :value="enemy?.hp ?? 0" :maximum="maxHealth(enemy)" tone="health" />
         <StatBar label="法力" :value="enemy?.mp ?? 0" :maximum="enemy?.class?.mp ?? 0" tone="mana" />
-        <dl><div><dt>武器</dt><dd>{{ enemy?.weapon?.name || '未知' }}</dd></div><div><dt>护甲</dt><dd>{{ enemy?.armor?.name || '未知' }}</dd></div><div v-if="snapshot.npc_enemy"><dt>威胁</dt><dd>{{ snapshot.npc_enemy.combat_threat ?? '未知' }}</dd></div></dl>
+        <dl><div><dt>武器</dt><dd>{{ enemy?.weapon?.name || '未知' }}</dd></div><div><dt>护甲</dt><dd>{{ enemy?.armor?.name || '未知' }}</dd></div><div v-if="snapshot.npc_enemy || snapshot.monster_enemy"><dt>威胁</dt><dd>{{ snapshot.monster_enemy?.combat.threat ?? snapshot.npc_enemy?.combat_threat ?? '未知' }}</dd></div></dl>
+        <p v-if="snapshot.monster_enemy" class="combatant-card__description">{{ snapshot.monster_enemy.description }}</p>
       </article>
     </div>
   </section>

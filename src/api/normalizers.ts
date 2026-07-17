@@ -86,19 +86,40 @@ export function normalizeProfile(profile: PlayerProfile): PlayerProfile {
     player_id: String(profile.player_id),
     character_id: String(profile.character_id),
     inventory: normalizeInventory(profile.inventory),
+    stamina: Number(profile.stamina ?? 100),
+    max_stamina: Number(profile.max_stamina ?? 100),
     current_map: profile.current_map ? normalizeMap(profile.current_map) : null,
+    world_maps: Object.fromEntries(
+      Object.entries(profile.world_maps ?? {}).map(([key, map]) => [key, normalizeMap(map)]),
+    ),
   }
 }
 
 function normalizeCell(cell: MapCell & { is_gathered?: boolean }): MapCell {
   return {
     ...cell,
+    terrain_category: cell.terrain_category ?? 'ordinary',
+    tags: cell.tags ?? [],
+    gatherable: Boolean(cell.gatherable),
+    campable: Boolean(cell.campable),
+    movement_cost: Number(cell.movement_cost ?? 1),
+    npc_chance_multiplier: Number(cell.npc_chance_multiplier ?? 1),
+    interaction_ids: cell.interaction_ids ?? [],
     gathered: Boolean(cell.gathered ?? cell.is_gathered),
+    triggered_event_ids: cell.triggered_event_ids ?? [],
+    active_event_ids: cell.active_event_ids ?? [],
   }
 }
 
 export function normalizeMap(map: MapInstance): MapInstance {
-  return { ...map, cells: (map.cells ?? []).map(normalizeCell) }
+  return {
+    ...map,
+    world_x: Number(map.world_x ?? 0),
+    world_y: Number(map.world_y ?? 0),
+    world_width: Number(map.world_width ?? 1),
+    world_height: Number(map.world_height ?? 1),
+    cells: (map.cells ?? []).map(normalizeCell),
+  }
 }
 
 export function normalizeMapState(response: MapStateResponse): MapStateResponse {
@@ -108,6 +129,7 @@ export function normalizeMapState(response: MapStateResponse): MapStateResponse 
     map: { ...normalizeMap(response.map), cells: mapGrid },
     map_grid: mapGrid,
     inventory_materials: normalizeQuantityMap(response.inventory_materials),
+    event_log: response.event_log ?? [],
   }
 }
 

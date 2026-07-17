@@ -1,5 +1,5 @@
 <template>
-  <span aria-hidden="true">
+  <span class="item-icon" :class="{ 'item-icon--image': imageUrl && !failed }" aria-hidden="true">
     <img v-if="imageUrl && !failed" :src="imageUrl" alt="" @error="failed = true" />
     <span v-else>{{ fallback }}</span>
   </span>

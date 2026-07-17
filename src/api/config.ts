@@ -1,4 +1,4 @@
-// const DEFAULT_HTTP_ORIGIN = 'http://192.168.3.67:8008'
+// const DEFAULT_HTTP_ORIGIN = 'http://192.168.3.67:8008' //局域网内调试
 const DEFAULT_HTTP_ORIGIN = 'https:game.toolup.cn'
 
 function withoutTrailingSlash(value: string): string {

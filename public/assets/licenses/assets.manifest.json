@@ -23,6 +23,42 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/delapouite/algae.svg",
+      "title": "Algae",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/algae.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/amber-mosquito.svg",
+      "title": "Amber mosquito",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/amber-mosquito.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/ancient-ruins.svg",
+      "title": "Ancient ruins",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/ancient-ruins.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/animal-hide.svg",
+      "title": "Animal hide",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/animal-hide.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/delapouite/barbarian.svg",
       "title": "Barbarian",
       "author": "Delapouite",
@@ -30,6 +66,15 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/berry-bush.svg",
+      "title": "Berry bush",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/berry-bush.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/delapouite/bolt-bomb.svg",
@@ -59,6 +104,33 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/delapouite/castle.svg",
+      "title": "Castle",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/castle.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/cave-entrance.svg",
+      "title": "Cave entrance",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/cave-entrance.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/circle-forest.svg",
+      "title": "Circle forest",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/circle-forest.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/delapouite/cleopatra.svg",
       "title": "Cleopatra",
       "author": "Delapouite",
@@ -66,6 +138,96 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/coal-pile.svg",
+      "title": "Coal pile",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/coal-pile.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/coral.svg",
+      "title": "Coral",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/coral.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/desert.svg",
+      "title": "Desert",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/desert.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/fire-gem.svg",
+      "title": "Fire gem",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/fire-gem.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/flying-beetle.svg",
+      "title": "Flying beetle",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/flying-beetle.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/forest.svg",
+      "title": "Forest",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/forest.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/grass.svg",
+      "title": "Grass",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/grass.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/graveyard.svg",
+      "title": "Graveyard",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/graveyard.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/ice-cubes.svg",
+      "title": "Ice cubes",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/ice-cubes.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/island.svg",
+      "title": "Island",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/island.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/delapouite/log.svg",
@@ -77,6 +239,24 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/delapouite/mine-wagon.svg",
+      "title": "Mine wagon",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/mine-wagon.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/mineral-pearls.svg",
+      "title": "Mineral pearls",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/mineral-pearls.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/delapouite/mushrooms.svg",
       "title": "Mushrooms",
       "author": "Delapouite",
@@ -84,6 +264,15 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/oasis.svg",
+      "title": "Oasis",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/oasis.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/delapouite/olive.svg",
@@ -95,6 +284,24 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/delapouite/oyster-pearl.svg",
+      "title": "Oyster pearl",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/oyster-pearl.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/palm-tree.svg",
+      "title": "Palm tree",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/palm-tree.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/delapouite/pirate-captain.svg",
       "title": "Pirate captain",
       "author": "Delapouite",
@@ -102,6 +309,42 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/reed.svg",
+      "title": "Reed",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/reed.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/river.svg",
+      "title": "River",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/river.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/road.svg",
+      "title": "Road",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/road.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/swamp.svg",
+      "title": "Swamp",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/swamp.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/delapouite/tribal-gear.svg",
@@ -131,6 +374,24 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/delapouite/village.svg",
+      "title": "Village",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/village.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/waterfall.svg",
+      "title": "Waterfall",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/waterfall.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/delapouite/wizard-face.svg",
       "title": "Wizard face",
       "author": "Delapouite",
@@ -147,6 +408,51 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/delapouite/wool.svg",
+      "title": "Wool",
+      "author": "Delapouite",
+      "source_url": "https://game-icons.net/1x1/delapouite/wool.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/faithtoken/ore.svg",
+      "title": "Ore",
+      "author": "Faithtoken",
+      "source_url": "https://game-icons.net/1x1/faithtoken/ore.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/bat-wing.svg",
+      "title": "Bat wing",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/bat-wing.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/crab.svg",
+      "title": "Crab",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/crab.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/crossed-bones.svg",
+      "title": "Crossed bones",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/crossed-bones.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/lorc/crossed-swords.svg",
@@ -185,6 +491,15 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/lorc/feather.svg",
+      "title": "Feather",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/feather.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/lorc/fire-bomb.svg",
       "title": "Fire bomb",
       "author": "Lorc",
@@ -194,6 +509,24 @@
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
     },
     {
+      "path": "/assets/vendor/game-icons/lorc/ghost.svg",
+      "title": "Ghost",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/ghost.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/honeycomb.svg",
+      "title": "Honeycomb",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/honeycomb.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
       "path": "/assets/vendor/game-icons/lorc/ice-bomb.svg",
       "title": "Ice bomb",
       "author": "Lorc",
@@ -201,6 +534,15 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/mountains.svg",
+      "title": "Mountains",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/mountains.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/lorc/plastron.svg",
@@ -219,6 +561,15 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/powder.svg",
+      "title": "Powder",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/powder.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/lorc/robe.svg",
@@ -246,6 +597,69 @@
       "license": "CC-BY-3.0",
       "modified": true,
       "modifications": "通过 Game-icons Studio 导出为白色图形配黑色背景；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/rune-stone.svg",
+      "title": "Rune stone",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/rune-stone.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/salt-shaker.svg",
+      "title": "Salt shaker",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/salt-shaker.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/scorpion-tail.svg",
+      "title": "Scorpion tail",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/scorpion-tail.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/snowflake-2.svg",
+      "title": "Snowflake 2",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/snowflake-2.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/spiral-shell.svg",
+      "title": "Spiral shell",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/spiral-shell.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/volcano.svg",
+      "title": "Volcano",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/volcano.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
+    },
+    {
+      "path": "/assets/vendor/game-icons/lorc/waves.svg",
+      "title": "Waves",
+      "author": "Lorc",
+      "source_url": "https://game-icons.net/1x1/lorc/waves.html",
+      "license": "CC-BY-3.0",
+      "modified": true,
+      "modifications": "移除默认黑色背景，并将前景调整为适配地图色块的米白色；未改变图形轮廓。"
     },
     {
       "path": "/assets/vendor/game-icons/lorc/wizard-staff.svg",

@@ -39,3 +39,5 @@ npm run check
 Game-icons 素材放在 `public/assets/vendor/game-icons/<作者>/` 中，由浏览器通过稳定 URL 直接加载，不进入 JavaScript 打包依赖，也不要远程盗链。后端物品目录可以保存类似 `/assets/vendor/game-icons/lorc/broadsword.svg` 的资源路径。
 
 每个素材必须登记到 `public/assets/licenses/assets.manifest.json`，包括标题、作者、原始页面、许可证以及是否修改。游戏页脚的“素材与许可”会展示这份署名清单；`npm run check` 会先执行 `npm run check:assets`，未登记文件或失效记录将阻止检查通过。具体录入步骤和范例见 `public/assets/vendor/game-icons/README.md`。
+
+当前世界地图使用透明背景、米白前景的同风格 Game-icons 变体。若已克隆 Game-icons 官方图标仓库，可运行 `node scripts/import-world-icons.mjs <仓库目录>` 重放本次精选图标的导入、主题转换和许可登记；脚本不会把整套上千个素材复制进项目。

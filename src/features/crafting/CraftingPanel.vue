@@ -28,7 +28,7 @@
       </button>
 
       <article v-if="result" class="craft-result">
-        <img v-if="result.image_url" :src="result.image_url" :alt="result.name" />
+        <ItemIcon v-if="result.image_url" class="craft-result__icon" :image-url="result.image_url" fallback="✧" />
         <span v-else class="craft-result__sigil">✧</span>
         <div><p class="eyebrow">NEW CREATION</p><h3>{{ result.name }}</h3><p>{{ result.desc }}</p><small>{{ labelFor(result.item_type) }} · 估值 ◈ {{ result.value }} · 战斗属性 {{ result.combat_stat }} · {{ result.can_be_ingredient ? '可继续作为原料' : '完整成品，不可继续炼制' }}</small></div>
       </article>

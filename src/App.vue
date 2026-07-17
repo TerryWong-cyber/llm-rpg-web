@@ -6,7 +6,11 @@
         <span class="brand__sigil">✦</span><span><strong>远境旅人志</strong><small>WAYFARER CHRONICLE</small></span>
       </a>
       <div v-if="player.hasSession.value" class="header-profile">
-        <span class="header-profile__name">{{ player.profile.value?.name }}</span>
+        <ItemIcon class="header-profile__avatar item-icon--portrait" :image-url="playerAvatarUrl" :fallback="playerInitial" />
+        <span class="header-profile__identity">
+          <strong class="header-profile__name">{{ player.profile.value?.name }}</strong>
+          <small>{{ playerCharacterName }}</small>
+        </span>
         <span class="header-profile__gold">◈ {{ player.profile.value?.gold ?? 0 }}</span>
         <button class="button button--quiet" type="button" @click="restartSession">新建旅程</button>
       </div>
@@ -62,8 +66,9 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import FeedbackBanner from './components/ui/FeedbackBanner.vue'
+import ItemIcon from './components/ui/ItemIcon.vue'
 import BattlePanel from './features/combat/BattlePanel.vue'
 import PrepPanel from './features/combat/PrepPanel.vue'
 import CharacterCreate from './features/character/CharacterCreate.vue'
@@ -84,6 +89,13 @@ const world = useWorldStore()
 const notifications = useNotificationsStore()
 const hubTab = ref<HubTab>('explore')
 const showAssetCredits = ref(false)
+const playerCharacter = computed(() => {
+  const id = player.profile.value?.character_id
+  return id ? catalog.meta.value?.characters[id] : undefined
+})
+const playerAvatarUrl = computed(() => playerCharacter.value?.image_url ?? '')
+const playerCharacterName = computed(() => playerCharacter.value?.name ?? '未记录的旅人')
+const playerInitial = computed(() => player.profile.value?.name?.slice(0, 1) || '旅')
 
 async function createCharacter(payload: { name: string; characterId: string }): Promise<void> {
   if (await player.create(payload.name, payload.characterId)) hubTab.value = 'explore'

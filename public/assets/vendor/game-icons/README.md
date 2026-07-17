@@ -20,6 +20,14 @@ game-icons/
 4. 如果改了颜色、轮廓、裁切或组合方式，将 `modified` 设为 `true` 并写明 `modifications`。
 5. 执行 `npm run check:assets`；漏登记、重复登记或文件不存在都会失败。
 
+地图与世界资源使用一组经过筛选的统一主题图标。若本地已有 Game-icons 官方 `icons` 仓库，可用下面的命令重放导入流程：
+
+```bash
+node scripts/import-world-icons.mjs /path/to/game-icons-icons
+```
+
+该脚本只导入项目实际使用的精选文件，移除官方 SVG 的默认黑色背景、将前景改为地图使用的米白色，并同步写入每个图标的作者、原始页面和修改说明。新增脚本清单外的素材仍需按下述流程人工核对来源。
+
 登记范例（仅作格式说明，不要原样加入清单）：
 
 ```json
