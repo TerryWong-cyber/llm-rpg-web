@@ -157,10 +157,10 @@ function submitPrep(payload: Omit<PrepMessage, 'action'>): void {
   }
 }
 
-function submitAction(actionKey: CombatActionMessage['action_key']): void {
+function submitAction(actionKey: CombatActionMessage['action_key'], itemId?: string): void {
   if (snapshot.value?.game_over || snapshot.value?.next_node !== 'PlayerAction') return
   try {
-    socket?.send({ action: 'combat', action_key: String(actionKey) })
+    socket?.send({ action: 'combat', action_key: String(actionKey), item_id: itemId })
     waitingForSnapshot.value = true
   } catch (error) {
     useNotificationsStore().capture(error, '战斗指令发送失败。')

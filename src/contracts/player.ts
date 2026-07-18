@@ -93,6 +93,23 @@ export interface ProfileUpdateResponse {
   reward?: { experience: number; levels_gained: number; level: number; attribute_points: number }
 }
 
+export interface ItemUseOutcome {
+  item_id: string
+  context: 'combat' | 'exploration' | 'world_event'
+  consumed: number
+  hp_restored: number
+  mp_restored: number
+  stamina_restored: number
+  cleared_statuses: number
+  applied_statuses: string[]
+}
+
+export interface UseItemResponse {
+  status: 'success'
+  profile: PlayerProfile
+  outcome: ItemUseOutcome
+}
+
 export interface CreateCharacterResponse {
   status: 'success'
   player_id: string
@@ -104,6 +121,12 @@ export interface TradeRequest {
   thread_id?: string | null
   item_type: ItemType
   item_id: string
+}
+
+export interface EquipmentRequest {
+  player_id: string
+  item_type: 'weapon' | 'armor'
+  item_id: string | null
 }
 
 export interface TradeResponse {
@@ -129,6 +152,10 @@ export interface CraftResult {
   combat_stat: number
   image_url: string
   can_be_ingredient: boolean
+  tradable: boolean
+  use_contexts: Array<'combat' | 'exploration' | 'world_event'>
+  category: string
+  tags: string[]
 }
 
 export interface CraftSuccessResponse {

@@ -1,6 +1,6 @@
 import { computed, readonly, ref } from 'vue'
 import { getGameMeta, getRecipes } from '../api/game'
-import type { CraftResult, GameMeta, ItemType, RecipeRecord } from '../contracts'
+import type { CraftResult, GameMeta, ItemType, ItemUseContext, RecipeRecord } from '../contracts'
 import { useNotificationsStore } from './notifications'
 
 export interface CatalogItemSummary {
@@ -12,6 +12,10 @@ export interface CatalogItemSummary {
   imageUrl?: string
   emoji?: string
   canBeIngredient: boolean
+  tradable: boolean
+  useContexts: ItemUseContext[]
+  category: string
+  tags: string[]
 }
 
 const meta = ref<GameMeta | null>(null)
@@ -38,6 +42,22 @@ function rememberCraftResult(result: CraftResult): void {
   recentCrafts.value = { ...recentCrafts.value, [result.id]: result }
 }
 
+function policySummary(item: {
+  can_be_ingredient: boolean
+  tradable: boolean
+  use_contexts: ItemUseContext[]
+  category: string
+  tags: string[]
+}) {
+  return {
+    canBeIngredient: item.can_be_ingredient,
+    tradable: item.tradable,
+    useContexts: item.use_contexts,
+    category: item.category,
+    tags: item.tags,
+  }
+}
+
 function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | null {
   const catalog = meta.value
   if (catalog) {
@@ -50,7 +70,7 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         desc: item.desc,
         value: item.value,
         imageUrl: item.image_url,
-        canBeIngredient: item.can_be_ingredient,
+        ...policySummary(item),
       }
     } else if (itemType === 'armor') {
       const item = catalog.armors[itemId]
@@ -61,7 +81,7 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         desc: item.desc,
         value: item.value,
         imageUrl: item.image_url,
-        canBeIngredient: item.can_be_ingredient,
+        ...policySummary(item),
       }
     } else if (itemType === 'item') {
       const item = catalog.items[itemId]
@@ -72,7 +92,7 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         desc: item.desc,
         value: item.value,
         imageUrl: item.image_url,
-        canBeIngredient: item.can_be_ingredient,
+        ...policySummary(item),
       }
     } else {
       const item = catalog.resources[itemId]
@@ -84,7 +104,7 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         value: item.value,
         imageUrl: item.image_url,
         emoji: item.emoji,
-        canBeIngredient: item.can_be_ingredient,
+        ...policySummary(item),
       }
     }
   }
@@ -98,7 +118,7 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
     value: crafted.value,
     imageUrl: crafted.image_url,
     emoji: itemType === 'material' ? '✦' : undefined,
-    canBeIngredient: crafted.can_be_ingredient,
+    ...policySummary(crafted),
   }
 }
 

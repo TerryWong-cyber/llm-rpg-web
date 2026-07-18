@@ -1,11 +1,7 @@
 <template>
   <section class="feature-stack">
-    <div class="feature-intro">
-      <div>
-        <p class="eyebrow">HALL OF CHALLENGES</p>
-        <h2>战备大厅</h2>
-        <p>选择独行试炼或邀请另一位旅人。房间断线后会立即失效。</p>
-      </div>
+    <div class="feature-toolbar">
+      <small>房间断线后会立即失效</small>
       <span class="connection-pill" :class="`connection-pill--${combat.connectionStatus.value}`">{{ connectionLabel }}</span>
     </div>
 
@@ -21,7 +17,7 @@
       <article class="mode-card mode-card--pve">
         <span class="mode-card__number">01</span><div class="mode-card__sigil">♜</div>
         <p class="eyebrow">SOLO EXPEDITION</p><h3>独行试炼</h3>
-        <p>先建立实时连接，再召唤 AI 对手，避免错过开局快照。</p>
+        <p>服务器会直接读取角色页面中的当前装备并进入战斗。</p>
         <button class="button button--primary" type="button" :disabled="busy" @click="startPve">{{ busy ? '正在布置战场…' : '开始 PvE 试炼' }}</button>
       </article>
 

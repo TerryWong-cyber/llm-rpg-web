@@ -1,13 +1,9 @@
 <template>
   <section v-if="profile && race" class="feature-stack growth-feature">
-    <header class="feature-intro growth-intro">
+    <header class="character-summary-bar">
       <ItemIcon class="growth-portrait item-icon--portrait" :image-url="race.image_url" :fallback="profile.name.slice(0, 1)" />
-      <div>
-        <p class="eyebrow">TRAVELER GROWTH</p>
-        <h2>{{ profile.name }} · {{ race.name }}</h2>
-        <p>{{ race.background }}</p>
-      </div>
-      <div class="level-seal"><small>当前等级</small><strong>Lv.{{ profile.level }}</strong><span>{{ profile.attribute_points }} 可用属性点</span></div>
+      <strong>{{ profile.name }} · {{ race.name }}</strong>
+      <span>Lv.{{ profile.level }} · {{ profile.attribute_points }} 可用属性点</span>
     </header>
 
     <div class="growth-grid">
@@ -41,6 +37,29 @@
       </article>
     </div>
 
+    <article class="panel equipment-panel">
+      <header><div><p class="eyebrow">CURRENT LOADOUT</p><h3>当前装备</h3></div><small>独行战斗将直接使用此配置</small></header>
+      <div class="equipment-slots">
+        <section
+          v-for="slot in equipmentSlots"
+          :key="slot.type"
+          class="equipment-dropzone"
+          :class="{ 'drop-target-active': selectedTransfer?.type === slot.type }"
+          :draggable="Boolean(slot.item)"
+          @click="placeEquipment(slot.type)"
+          @dragover.prevent
+          @drop.prevent="placeEquipment(slot.type)"
+          @dragstart="beginEquipmentDrag(slot.type, $event)"
+          @dragend="transfer.endDrag"
+        >
+          <ItemIcon class="equipment-slot__icon" :image-url="slot.item?.image_url" :fallback="slot.type === 'weapon' ? '⚔' : '◈'" />
+          <span><small>{{ slot.type === 'weapon' ? '主武器' : '护甲' }}</small><strong>{{ slot.item?.name ?? '未装备' }}</strong><em>{{ slot.item?.desc ?? '请从行囊中选择装备' }}</em></span>
+          <button v-if="slot.item" class="button button--ghost" type="button" :disabled="player.busy.value" @click.stop="unequip(slot.type)">卸下</button>
+          <button v-else class="button button--ghost" type="button" @click.stop="openInventory">前往行囊</button>
+        </section>
+      </div>
+    </article>
+
     <article class="panel quest-ledger">
       <header><div><p class="eyebrow">QUEST EXPERIENCE</p><h3>任务与经验</h3></div><b>{{ activeQuests.length }} 项进行中</b></header>
       <div v-if="activeQuests.length" class="quest-list">
@@ -60,16 +79,24 @@ import type { CharacterAttributes, QuestProgress, QuestRequirement } from '../..
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCatalogStore } from '../../stores/catalog'
 import { usePlayerStore } from '../../stores/player'
+import { useItemTransferStore, type TransferItem } from '../../stores/itemTransfer'
 
 type AttributeId = keyof CharacterAttributes
 
 const player = usePlayerStore()
 const catalog = useCatalogStore()
+const transfer = useItemTransferStore()
+const selectedTransfer = computed(() => transfer.selected.value)
 const profile = computed(() => player.profile.value)
 const race = computed(() => {
   const id = profile.value?.race_id
   return id ? catalog.meta.value?.races[id] ?? null : null
 })
+const emit = defineEmits<{ inventory: [] }>()
+const equipmentSlots = computed(() => [
+  { type: 'weapon' as const, item: profile.value?.equipped_weapon_id ? catalog.meta.value?.weapons[profile.value.equipped_weapon_id] : undefined },
+  { type: 'armor' as const, item: profile.value?.equipped_armor_id ? catalog.meta.value?.armors[profile.value.equipped_armor_id] : undefined },
+])
 const pending = reactive<Record<AttributeId, number>>({ vitality: 0, strength: 0, agility: 0, wisdom: 0, luck: 0 })
 const attributes: Array<{ id: AttributeId; label: string; effect: string }> = [
   { id: 'vitality', label: '体质', effect: '提高最大生命与异常抗性' },
@@ -106,5 +133,34 @@ function requirementMet(requirement: QuestRequirement): boolean {
 
 function questReady(quest: QuestProgress): boolean {
   return quest.requirements.every(requirementMet)
+}
+
+function openInventory(): void { emit('inventory') }
+
+async function unequip(type: 'weapon' | 'armor'): Promise<void> {
+  if (await player.setEquipment(type, null)) transfer.clear()
+}
+
+async function placeEquipment(type: 'weapon' | 'armor'): Promise<void> {
+  const item = transfer.selected.value
+  if (!item || item.type !== type) return
+  if (await player.setEquipment(type, item.id)) transfer.clear()
+}
+
+function beginEquipmentDrag(type: 'weapon' | 'armor', event: DragEvent): void {
+  const slot = equipmentSlots.value.find((entry) => entry.type === type)
+  if (!slot?.item) return
+  const summary = catalog.itemSummary(type, slot.item.id)
+  const item: TransferItem = {
+    id: slot.item.id,
+    type,
+    name: slot.item.name,
+    count: 1,
+    icon: type === 'weapon' ? '⚔' : '◈',
+    imageUrl: slot.item.image_url,
+    canBeIngredient: summary?.canBeIngredient ?? false,
+    equipped: true,
+  }
+  transfer.beginDrag(item, event.dataTransfer)
 }
 </script>

@@ -1,51 +1,5 @@
 <template>
   <section class="feature-stack exploration-feature">
-    <div class="feature-intro exploration-intro">
-      <div>
-        <p class="eyebrow">THE NINE REALMS</p>
-        <h2>埃尔德兰世界地图</h2>
-        <p>九个地域各自拥有不同生态与风土。使用方向键、WASD、地图相邻格或方向盘移动。</p>
-      </div>
-      <div class="world-status">
-        <div class="time-seal"><small>{{ seasonLabel }}</small><strong>{{ timeLabel }}</strong><span>现实 10 秒 = 世界 1 小时</span></div>
-        <div class="stamina-card">
-          <div><small>探索精力</small><strong>{{ stamina }} / {{ maxStamina }}</strong></div>
-          <div class="stamina-meter"><i :style="{ width: `${staminaPercent}%` }" /></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="world-layout">
-      <aside class="world-map panel">
-        <header><p class="eyebrow">WORLD OVERVIEW</p><h3>九域方位</h3></header>
-        <div class="world-grid" :style="worldGridStyle">
-          <div
-            v-for="region in worldRegions"
-            :key="region.region_id"
-            class="world-region"
-            :class="{ 'world-region--current': region.region_id === exploration.state.value?.map.region_id }"
-            :title="`${region.name} · ${region.climate}`"
-          ><span><img :src="regionIcon(region.region_id).imageUrl" alt="" /></span><small>{{ region.name }}</small></div>
-        </div>
-        <p v-if="currentRegion" class="world-culture"><b>{{ currentRegion.climate }}</b>{{ currentRegion.culture }}</p>
-      </aside>
-
-      <div class="map-controls panel">
-        <template v-if="!exploration.state.value">
-          <p>出生地域由种族与国度决定，你会从拥有商人与旅馆的出生城镇开始旅程。</p>
-          <button class="button button--primary" type="button" :disabled="exploration.busy.value" @click="enterSelected(false)">前往出生城镇</button>
-        </template>
-        <template v-else>
-          <div class="map-region-card">
-            <small>当前区域</small><strong>{{ regionName }}</strong><span>世界坐标 {{ exploration.state.value.map.world_x + 1 }}, {{ exploration.state.value.map.world_y + 1 }} · {{ currentRegion?.climate }}</span>
-            <p>{{ currentRegion?.culture }}</p>
-            <div class="neighbor-list"><span v-for="neighbor in neighborRegions" :key="neighbor.direction"><b>{{ neighbor.label }}</b>{{ neighbor.name }}</span></div>
-          </div>
-          <button class="button button--danger-ghost" type="button" :disabled="exploration.busy.value" @click="enterSelected(true)">重新生成世界</button>
-        </template>
-      </div>
-    </div>
-
     <article v-if="exploration.state.value?.encounter" class="encounter-banner">
       <span class="encounter-banner__sigil">✦</span>
       <div><p class="eyebrow">A FATEFUL ENCOUNTER</p><h3>你察觉到附近有一位值得交谈的人</h3><p>聚落会显著提高相遇概率，但最终结果仍由服务端规则决定。</p></div>
@@ -78,15 +32,30 @@
         </div>
         <p v-if="exploration.state.value.event.blocks_movement" class="event-forced-warning">此事件封锁了道路，必须先处理才能离开当前地图格。</p>
         <div v-if="exploration.state.value.event.actions.length" class="world-event__actions">
-          <button
+          <template
             v-for="action in exploration.state.value.event.actions"
             :key="action.action_id"
-            class="button"
-            :class="action.style === 'danger' ? 'button--danger-ghost' : action.style === 'primary' ? 'button--primary' : 'button--ghost'"
-            type="button"
-            :disabled="exploration.busy.value"
-            @click="resolveEventAction(action.action_id)"
-          >{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
+          >
+            <div v-if="action.kind === 'use_item'" class="world-event__item-action">
+              <select v-model="eventItemSelections[action.action_id]" :disabled="exploration.busy.value || !action.eligible_items.length">
+                <option value="">{{ action.eligible_items.length ? '选择可用物品' : '行囊中没有匹配物品' }}</option>
+                <option v-for="item in action.eligible_items" :key="item.item_id" :value="item.item_id">
+                  {{ item.name }} × {{ item.quantity }}
+                </option>
+              </select>
+              <button class="button button--primary" type="button" :disabled="exploration.busy.value || !eventItemSelections[action.action_id]" @click="resolveEventAction(action.action_id, eventItemSelections[action.action_id])">
+                {{ action.forced ? '必须 · ' : '' }}{{ action.label }}
+              </button>
+            </div>
+            <button
+              v-else
+              class="button"
+              :class="action.style === 'danger' ? 'button--danger-ghost' : action.style === 'primary' ? 'button--primary' : 'button--ghost'"
+              type="button"
+              :disabled="exploration.busy.value"
+              @click="resolveEventAction(action.action_id)"
+            >{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
+          </template>
         </div>
       </div>
     </article>
@@ -94,10 +63,17 @@
     <div v-if="exploration.state.value" class="atlas panel">
       <header class="atlas__header">
         <div>
-          <p class="eyebrow">{{ regionName }}</p>
+          <p class="eyebrow">THE NINE REALMS · {{ regionName }}</p>
           <h3>16 × 16 地域探索图</h3>
+          <small class="atlas__region-summary">世界坐标 {{ exploration.state.value.map.world_x + 1 }}, {{ exploration.state.value.map.world_y + 1 }} · {{ currentRegion?.climate }} · {{ currentRegion?.culture }}</small>
         </div>
-        <div class="atlas__legend"><span><i class="legend-current" />当前位置</span><span><i class="legend-route" />可前往</span><span><i class="legend-resource" />可采集</span><span><i class="legend-blocked" />不可通行</span></div>
+        <div class="atlas__status">
+          <span class="atlas__time"><b>{{ dayMoment.icon }} {{ dayMoment.label }}</b><small>{{ seasonLabel }} · {{ timeLabel }}</small></span>
+          <span class="atlas__stamina"><small>探索精力</small><b>{{ stamina }} / {{ maxStamina }}</b><i><em :style="{ width: `${staminaPercent}%` }" /></i></span>
+          <button class="button button--ghost" type="button" @click="showHelp = true">操作与帮助</button>
+          <button class="button button--ghost" type="button" @click="emit('world-overview')">九域总览</button>
+          <button class="button button--danger-ghost" type="button" :disabled="exploration.busy.value" @click="enterSelected(true)">重置世界</button>
+        </div>
       </header>
 
       <div class="atlas__body">
@@ -130,17 +106,6 @@
           </div>
         </div>
 
-        <aside class="travel-console">
-          <div class="direction-pad" aria-label="移动方向">
-            <button type="button" aria-label="向上移动" :disabled="directionDisabled('up')" @click="moveDirection('up')">↑</button>
-            <button type="button" aria-label="向左移动" :disabled="directionDisabled('left')" @click="moveDirection('left')">←</button>
-            <span>⌖</span>
-            <button type="button" aria-label="向右移动" :disabled="directionDisabled('right')" @click="moveDirection('right')">→</button>
-            <button type="button" aria-label="向下移动" :disabled="directionDisabled('down')" @click="moveDirection('down')">↓</button>
-          </div>
-          <small>方向键 / WASD</small>
-          <p>到达 16×16 边缘后继续前进，即可进入世界地图中相邻的国家或地域。</p>
-        </aside>
       </div>
 
       <footer class="atlas__footer">
@@ -158,10 +123,6 @@
           </button>
           <button class="button button--ghost" type="button" :disabled="!canCamp" :title="campReason" @click="exploration.camp">⛺ 扎营休息</button>
           <button v-if="exploration.currentCell.value?.interaction_ids.includes('inn')" class="button button--gold" type="button" :disabled="!exploration.innAvailable.value || exploration.busy.value" :title="innReason" @click="exploration.restAtInn">♨ 旅店休整</button>
-          <select v-if="foodItems.length" v-model="selectedFood" aria-label="选择食物" :disabled="!exploration.state.value.actions.eat.available">
-            <option v-for="food in foodItems" :key="food.id" :value="food.id">{{ food.name }} ×{{ food.count }}（+{{ food.restore }}）</option>
-          </select>
-          <button v-if="foodItems.length" class="button button--ghost" type="button" :disabled="!selectedFood || !exploration.state.value.actions.eat.available" @click="exploration.eat(selectedFood)">进食</button>
           <button class="button button--gold" type="button" :disabled="!exploration.shopAvailable.value" :title="shopReason" @click="emit('shop')">进入商店</button>
         </div>
       </footer>
@@ -182,24 +143,7 @@
     </div>
 
     <div v-else-if="exploration.busy.value" class="empty-state"><span class="spinner" /><h3>世界正在展开</h3><p>地块数量、资源与通路正在根据固定种子生成。</p></div>
-    <div v-else class="empty-state"><span>⌖</span><h3>尚未踏上世界地图</h3><p>选择一个初始地域；之后只能通过边界进入相邻国家。</p></div>
-
-    <details v-if="eventLog.length" class="event-journal panel">
-      <summary>
-        <span><small>WORLD EVENT JOURNAL</small><strong>世界事件记录</strong></span>
-        <b>{{ eventLog.length }} 条</b>
-      </summary>
-      <div class="event-journal__list">
-        <article v-for="entry in eventLog" :key="entry.log_id">
-          <span>{{ entry.emoji }}</span>
-          <div>
-            <small>{{ eventPhaseLabel(entry.phase) }} · {{ eventLocationLabel(entry.region_id, entry.cell_id) }} · {{ eventDateLabel(entry) }}</small>
-            <strong>{{ entry.title }}</strong>
-            <p>{{ entry.description }}</p>
-          </div>
-        </article>
-      </div>
-    </details>
+    <div v-else class="empty-state"><span>⌖</span><h3>尚未踏上世界地图</h3><p>出生地域由种族与国度决定。</p><button class="button button--primary" type="button" @click="enterSelected(false)">前往出生城镇</button></div>
 
     <div v-if="materials.length" class="materials-strip">
       <small>采集袋</small>
@@ -208,6 +152,15 @@
         <i v-else>{{ material.emoji }}</i>
         {{ material.name }} <b>×{{ material.count }}</b>
       </span>
+    </div>
+
+    <div v-if="showHelp" class="modal-backdrop operation-help-backdrop" @click.self="showHelp = false">
+      <section class="modal operation-help" role="dialog" aria-modal="true" aria-labelledby="operation-help-title">
+        <header><div><p class="eyebrow">OPERATIONS & TIPS</p><h2 id="operation-help-title">操作与帮助</h2></div><button class="icon-button" type="button" aria-label="关闭操作帮助" @click="showHelp = false">×</button></header>
+        <div class="operation-help__grid">
+          <article v-for="tip in helpTips" :key="tip.title"><span>{{ tip.icon }}</span><div><strong>{{ tip.title }}</strong><p>{{ tip.description }}</p></div></article>
+        </div>
+      </section>
     </div>
   </section>
 </template>
@@ -221,12 +174,13 @@ import { useCombatStore } from '../../stores/combat'
 import { useExplorationStore } from '../../stores/exploration'
 import { usePlayerStore } from '../../stores/player'
 
-const emit = defineEmits<{ encounter: [npcId: string]; shop: [] }>()
+const emit = defineEmits<{ encounter: [npcId: string]; shop: []; 'world-overview': [] }>()
 const exploration = useExplorationStore()
 const player = usePlayerStore()
 const catalog = useCatalogStore()
 const combat = useCombatStore()
-const selectedFood = ref('')
+const showHelp = ref(false)
+const eventItemSelections = ref<Record<string, string>>({})
 const mapScroll = ref<HTMLElement | null>(null)
 
 watch(
@@ -247,30 +201,9 @@ watch(
 const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${exploration.state.value?.map.width ?? 1}, minmax(2.43rem, 1fr))`,
 }))
-const worldGridStyle = computed(() => ({
-  gridTemplateColumns: `repeat(${exploration.state.value?.world.width ?? exploration.templates.value?.world_grid.width ?? 3}, 1fr)`,
-}))
-const worldRegions = computed(() => Object.values(
-  exploration.state.value?.world.regions ?? exploration.templates.value?.regions ?? {},
-).sort((a, b) => a.world_y - b.world_y || a.world_x - b.world_x))
 const currentRegion = computed(() => {
   const id = exploration.state.value?.map.region_id
   return id ? (exploration.state.value?.world.regions[id] ?? exploration.templates.value?.regions[id]) : null
-})
-const neighborRegions = computed(() => {
-  const map = exploration.state.value?.map
-  const regions = exploration.state.value?.world.regions
-  if (!map || !regions) return []
-  const directions = [
-    { direction: 'up', label: '北', x: map.world_x, y: map.world_y - 1 },
-    { direction: 'down', label: '南', x: map.world_x, y: map.world_y + 1 },
-    { direction: 'left', label: '西', x: map.world_x - 1, y: map.world_y },
-    { direction: 'right', label: '东', x: map.world_x + 1, y: map.world_y },
-  ]
-  return directions.flatMap((direction) => {
-    const region = Object.values(regions).find((item) => item.world_x === direction.x && item.world_y === direction.y)
-    return region ? [{ ...direction, name: region.name }] : []
-  })
 })
 const currentTerrain = computed(() => terrain(exploration.currentCell.value?.terrain_id))
 const playerRace = computed(() => {
@@ -284,9 +217,20 @@ const stamina = computed(() => exploration.state.value?.player.stamina ?? player
 const maxStamina = computed(() => exploration.state.value?.player.max_stamina ?? player.profile.value?.max_stamina ?? 100)
 const staminaPercent = computed(() => Math.max(0, Math.min(100, stamina.value / Math.max(1, maxStamina.value) * 100)))
 const seasonLabel = computed(() => ({ spring: '春季', summer: '夏季', autumn: '秋季', winter: '冬季' }[currentTime.value?.season ?? 'spring']))
+const dayMoment = computed(() => {
+  const hour = currentTime.value?.hour
+  if (hour === undefined) return { label: '同步中', icon: '◌' }
+  if (hour < 5) return { label: '深夜', icon: '☾' }
+  if (hour < 7) return { label: '黎明', icon: '◒' }
+  if (hour < 11) return { label: '上午', icon: '☀' }
+  if (hour < 14) return { label: '中午', icon: '◉' }
+  if (hour < 18) return { label: '下午', icon: '☀' }
+  if (hour < 20) return { label: '傍晚', icon: '◐' }
+  return { label: '夜晚', icon: '☾' }
+})
 const timeLabel = computed(() => {
   const time = currentTime.value
-  return time ? `公元 ${time.year} 年 · ${time.month} 月 ${time.day} 日 · ${String(time.hour).padStart(2, '0')}:00` : '时间同步中'
+  return time ? `${time.month} 月 ${time.day} 日 · ${String(time.hour).padStart(2, '0')}:00` : '时间同步中'
 })
 const canGather = computed(() => Boolean(exploration.gatherAvailable.value && !exploration.busy.value))
 const canCamp = computed(() => Boolean(exploration.campAvailable.value && !exploration.busy.value))
@@ -303,7 +247,6 @@ const terrainDescription = computed(() => {
   const labels = { ordinary: '普通地块', resource: '资源地块', settlement: '聚落地块', interactive: '交互地块', blocked: '阻挡地块' }
   return `${labels[cell.terrain_category]} · 移动消耗 ${cell.movement_cost} 精力${cell.landmark_id ? ` · ${cell.landmark_id}` : ''}`
 })
-const eventLog = computed(() => [...(exploration.state.value?.event_log ?? [])].reverse().slice(0, 30))
 const eventParticipant = computed(() => exploration.state.value?.event?.participant ?? null)
 const participantFallback = computed(() => {
   const participant = eventParticipant.value
@@ -322,19 +265,14 @@ const materials = computed(() => {
     rarity: state.resources_meta[id]?.rarity ?? 'common',
   }))
 })
-const foodItems = computed(() => {
-  const items = player.profile.value?.inventory.items ?? {}
-  const meta = catalog.meta.value?.items ?? {}
-  return Object.entries(items).flatMap(([id, count]) => {
-    const item = meta[id]
-    return count > 0 && (item?.stamina_restore ?? 0) > 0
-      ? [{ id, count, name: item.name, restore: item.stamina_restore ?? 0 }]
-      : []
-  })
-})
-watch(foodItems, (items) => {
-  if (!items.some((item) => item.id === selectedFood.value)) selectedFood.value = items[0]?.id ?? ''
-}, { immediate: true })
+const helpTips = [
+  { icon: '⌨', title: '移动', description: '聚焦地图后使用方向键或 WASD；也可以直接点击相邻且可通行的地图格。' },
+  { icon: '◇', title: '行囊与食物', description: '食物、药剂和工具都从旅人行囊使用；悬停一秒或点击物品格可查看效果。' },
+  { icon: '⚔', title: '装备与战斗', description: '在角色页面或行囊中装备武器与护甲。PVE 会直接使用当前装备。' },
+  { icon: '✦', title: '事件交互', description: '部分事件可以使用带有匹配类别与能力标签的物品解决，服务器会最终判定。' },
+  { icon: '☀', title: '时间与环境', description: '昼夜和季节会影响商店、资源、事件与地图氛围；旅店和扎营可以恢复状态。' },
+  { icon: '⌖', title: '跨越地域', description: '到达 16×16 地图边缘后继续移动，即可进入九域总览中的相邻地域。' },
+]
 const availableResources = computed(() => {
   const time = currentTime.value
   const state = exploration.state.value
@@ -360,20 +298,6 @@ const availableResources = computed(() => {
 })
 
 function terrain(id?: string) { return id ? exploration.state.value?.terrains_meta[id] ?? null : null }
-function regionIcon(id: string): { imageUrl: string } {
-  const images = {
-    frost_crown: '/assets/vendor/game-icons/lorc/snowflake-2.svg',
-    broken_spine: '/assets/vendor/game-icons/lorc/mountains.svg',
-    moon_vale: '/assets/vendor/game-icons/delapouite/graveyard.svg',
-    western_desert: '/assets/vendor/game-icons/delapouite/desert.svg',
-    mistwood: '/assets/vendor/game-icons/delapouite/circle-forest.svg',
-    emerald_coast: '/assets/vendor/game-icons/delapouite/island.svg',
-    amber_steppe: '/assets/vendor/game-icons/delapouite/grass.svg',
-    silver_marsh: '/assets/vendor/game-icons/delapouite/swamp.svg',
-    ashlands: '/assets/vendor/game-icons/lorc/volcano.svg',
-  } as Record<string, string>
-  return { imageUrl: images[id] ?? '/assets/vendor/game-icons/delapouite/grass.svg' }
-}
 function rarityLabel(rarity?: string): string { return ({ common: '常见', uncommon: '少见', rare: '稀有' } as Record<string, string>)[rarity ?? 'common'] ?? '常见' }
 function categoryLabel(category?: string): string { return ({ wood: '木材', plant: '植物', mineral: '矿物', creature: '生物素材', aquatic: '水产', arcane: '灵性素材', regional: '地域特产', relic: '遗物' } as Record<string, string>)[category ?? ''] ?? '素材' }
 function dropName(type: 'item' | 'material', id: string): string {
@@ -382,14 +306,6 @@ function dropName(type: 'item' | 'material', id: string): string {
     : catalog.meta.value?.items[id]?.name ?? id
 }
 function eventStateLabel(state: string): string { return ({ triggered: '新事件', active: '持续事件', expired: '事件结束', action: '行动结果' } as Record<string, string>)[state] ?? '世界事件' }
-function eventPhaseLabel(phase: string): string { return ({ triggered: '事件触发', action: '采取行动', expired: '状态变化' } as Record<string, string>)[phase] ?? '事件记录' }
-function eventLocationLabel(regionId: string, cellId: number): string {
-  const region = exploration.state.value?.world.regions[regionId]?.name ?? regionId
-  return `${region} · 地图格 ${cellId}`
-}
-function eventDateLabel(entry: { year: number; month: number; day: number; hour: number }): string {
-  return `公元 ${entry.year} 年 ${entry.month} 月 ${entry.day} 日 ${String(entry.hour).padStart(2, '0')}:00`
-}
 function cellClass(cell: MapCell): Record<string, boolean> {
   return {
     'map-cell--current': cell.cell_id === exploration.state.value?.map.current_cell_id,
@@ -458,10 +374,10 @@ function scrollPlayerIntoView(immediate = false): void {
     behavior: immediate || reduceMotion ? 'auto' : 'smooth',
   })
 }
-async function resolveEventAction(actionId: string): Promise<void> {
+async function resolveEventAction(actionId: string, itemId?: string): Promise<void> {
   const event = exploration.state.value?.event
   if (!event) return
-  const response = await exploration.resolveEventAction(event.event_id, actionId)
+  const response = await exploration.resolveEventAction(event.event_id, actionId, itemId)
   if (!response) return
   if (response.combat) {
     await combat.startEncounterBattle(response.combat)

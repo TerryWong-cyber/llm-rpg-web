@@ -164,7 +164,7 @@ async function eat(itemId: string): Promise<void> {
   }
 }
 
-async function resolveEventAction(eventId: string, actionId: string): Promise<EventActionResponse | null> {
+async function resolveEventAction(eventId: string, actionId: string, itemId?: string): Promise<EventActionResponse | null> {
   const playerId = usePlayerStore().playerId.value
   if (!playerId || !state.value || busy.value) return null
   busy.value = true
@@ -173,6 +173,7 @@ async function resolveEventAction(eventId: string, actionId: string): Promise<Ev
       player_id: playerId,
       event_id: eventId,
       action_id: actionId,
+      item_id: itemId,
     })
     applyMapState(response)
     return response

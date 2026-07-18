@@ -24,7 +24,7 @@
           </span>
         </div>
         <dl>
-          <div><dt>武器</dt><dd>{{ me?.weapon?.name || '无' }}</dd></div><div><dt>护甲</dt><dd>{{ me?.armor?.name || '无' }}</dd></div><div><dt>药剂</dt><dd>{{ me?.item?.name || '无' }} <template v-if="me?.item">×{{ me.itemCount }}</template></dd></div>
+          <div><dt>武器</dt><dd>{{ me?.weapon?.name || '无' }}</dd></div><div><dt>护甲</dt><dd>{{ me?.armor?.name || '无' }}</dd></div><div><dt>战斗道具</dt><dd>从行囊即时选取</dd></div>
           <div><dt>物抗 / 法抗</dt><dd>{{ rounded(me?.stats?.physical_resistance) }} / {{ rounded(me?.stats?.magic_resistance) }}</dd></div>
           <div><dt>命中 / 闪避</dt><dd>{{ rounded(me?.stats?.accuracy) }} / {{ rounded(me?.stats?.evasion) }}</dd></div>
         </dl>
@@ -64,7 +64,21 @@
           <button v-for="skill in me?.raceSkills" :key="skill.id" class="race-action" type="button" :disabled="actionsDisabled || !canUseRaceSkill(skill)" @click="combat.submitAction(skill.id)">
             <span>☽</span><strong>{{ skill.name }}</strong><small>种族专属 · {{ raceSkillCost(skill) }}</small>
           </button>
-          <button v-if="me?.item" type="button" :disabled="actionsDisabled || me.itemCount <= 0" @click="combat.submitAction('i')"><span>⚗</span><strong>{{ me.item.name }}</strong><small>剩余 {{ me.itemCount }}</small></button>
+          <button type="button" :disabled="actionsDisabled" @click="showItems = true"><span>⚗</span><strong>使用物品</strong><small>{{ combatItems.length }} 种可用</small></button>
+        </div>
+
+        <div v-if="showItems" class="battle-item-backdrop" @click.self="showItems = false">
+          <section class="battle-item-picker" role="dialog" aria-modal="true" aria-label="选择战斗物品">
+            <header><div><p class="eyebrow">COMBAT SATCHEL</p><h3>选择战斗物品</h3></div><button class="icon-button" type="button" aria-label="关闭战斗行囊" @click="showItems = false">×</button></header>
+            <div v-if="combatItems.length" class="battle-item-list">
+              <button v-for="item in combatItems" :key="item.id" type="button" :disabled="actionsDisabled" @click="useCombatItem(item.id)">
+                <ItemIcon class="battle-item-list__icon" :image-url="item.image_url" fallback="⚗" />
+                <span><strong>{{ item.name }}</strong><small>{{ item.desc }}</small><em>{{ item.category }} · {{ item.tags.join('、') }}</em></span>
+                <b>× {{ item.count }}</b>
+              </button>
+            </div>
+            <div v-else class="empty-state empty-state--compact"><span>◇</span><h3>没有战斗可用物品</h3><p>只有标记为“战斗中”的物品会出现在这里。</p></div>
+          </section>
         </div>
       </article>
 
@@ -90,17 +104,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { CombatantResolution, CombatSnapshot, DamageBreakdown, SkillDefinition } from '../../contracts'
+import ItemIcon from '../../components/ui/ItemIcon.vue'
 import StatBar from '../../components/ui/StatBar.vue'
+import { useCatalogStore } from '../../stores/catalog'
 import { useCombatStore } from '../../stores/combat'
 import { usePlayerStore } from '../../stores/player'
 
 const props = defineProps<{ snapshot: CombatSnapshot }>()
 const combat = useCombatStore()
 const player = usePlayerStore()
+const catalog = useCatalogStore()
+const showItems = ref(false)
 const me = combat.me
 const enemy = combat.enemy
+const combatItems = computed(() => Object.entries(player.profile.value?.inventory.items ?? {}).flatMap(([id, count]) => {
+  const item = catalog.meta.value?.items[id]
+  return item && count > 0 && item.use_contexts.includes('combat') ? [{ ...item, count }] : []
+}))
 const actionsDisabled = computed(() => combat.waitingForSnapshot.value || combat.snapshot.value?.next_node !== 'PlayerAction')
 const isSecondPlayer = computed(() => props.snapshot.state.p2_id === player.playerId.value)
 const resolution = computed(() => (
@@ -151,5 +173,10 @@ function damageSummary(damage: DamageBreakdown): string {
 
 function incomingExtra(value: CombatantResolution): number {
   return value.status_damage_received.total + value.environment_damage_received.total
+}
+
+function useCombatItem(itemId: string): void {
+  combat.submitAction('i', itemId)
+  showItems.value = false
 }
 </script>

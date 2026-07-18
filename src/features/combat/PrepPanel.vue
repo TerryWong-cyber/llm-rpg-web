@@ -28,18 +28,10 @@
           <ItemIcon class="loadout-option__icon" :image-url="meta.armors[id]?.image_url" fallback="◈" /><span><strong>{{ meta.armors[id]?.name ?? id }}</strong><small>{{ meta.armors[id]?.desc }}</small></span>
         </label>
       </fieldset>
-      <fieldset class="loadout-column panel">
-        <legend><span>03</span> 携带药剂 <small>可选</small></legend>
-        <label class="loadout-option" :class="{ selected: itemId === '' }"><input v-model="itemId" type="radio" value="" /><ItemIcon class="loadout-option__icon" fallback="◇" /><span><strong>不携带药剂</strong><small>保留行囊中的消耗品</small></span></label>
-        <label v-for="(count, id) in ownedItems" :key="id" class="loadout-option" :class="{ selected: itemId === id }">
-          <input v-model="itemId" type="radio" :value="id" />
-          <ItemIcon class="loadout-option__icon" :image-url="meta.items[id]?.image_url" fallback="⚗" /><span><strong>{{ meta.items[id]?.name ?? id }}</strong><small>可用 {{ count }} · {{ meta.items[id]?.desc }}</small></span>
-        </label>
-      </fieldset>
     </div>
 
     <footer class="prep-footer">
-      <div><p class="eyebrow">SELECTED LOADOUT</p><strong>{{ meta.weapons[weaponId]?.name || '未选武器' }} · {{ meta.armors[armorId]?.name || '未选护甲' }} · {{ itemId ? meta.items[itemId]?.name : '无药剂' }}</strong></div>
+      <div><p class="eyebrow">SELECTED LOADOUT</p><strong>{{ meta.weapons[weaponId]?.name || '未选武器' }} · {{ meta.armors[armorId]?.name || '未选护甲' }}</strong></div>
       <button class="button button--primary button--large" type="button" :disabled="!weaponId || !armorId || combat.waitingForSnapshot.value" @click="submit">
         {{ combat.waitingForSnapshot.value ? '等待服务器确认…' : '确认装备' }}
       </button>
@@ -59,12 +51,10 @@ const combat = useCombatStore()
 const player = usePlayerStore()
 const weaponId = ref('')
 const armorId = ref('')
-const itemId = ref('')
 
 const inventory = computed(() => combat.me.value?.inventory)
 const ownedWeapons = computed(() => 'weapons' in (inventory.value ?? {}) ? [...new Set(inventory.value.weapons)] : [])
 const ownedArmors = computed(() => 'armors' in (inventory.value ?? {}) ? [...new Set(inventory.value.armors)] : [])
-const ownedItems = computed(() => 'items' in (inventory.value ?? {}) ? Object.fromEntries(Object.entries(inventory.value.items).filter(([, count]) => count > 0)) : {})
 
 watch(ownedWeapons, (ids) => {
   if (!ids.includes(weaponId.value)) {
@@ -80,6 +70,6 @@ watch(ownedArmors, (ids) => {
 }, { immediate: true })
 
 function submit(): void {
-  combat.submitPrep({ weapon_id: weaponId.value, armor_id: armorId.value, item_id: itemId.value || null })
+  combat.submitPrep({ weapon_id: weaponId.value, armor_id: armorId.value, item_id: null })
 }
 </script>

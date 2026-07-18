@@ -9,6 +9,8 @@ import type {
   RecipesResponse,
   TradeRequest,
   TradeResponse,
+  UseItemResponse,
+  EquipmentRequest,
 } from '../contracts'
 import { apiRequest } from './client'
 import { normalizeCombatSnapshot, normalizeGameMeta, normalizeProfile } from './normalizers'
@@ -39,6 +41,14 @@ export async function allocateAttributes(
   return { ...response, profile: normalizeProfile(response.profile) }
 }
 
+export async function setEquipment(payload: EquipmentRequest): Promise<ProfileUpdateResponse> {
+  const response = await apiRequest<ProfileUpdateResponse>('/api/game/character/equipment', {
+    method: 'POST',
+    body: payload,
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
 export async function completeQuest(
   playerId: string,
   npcId: string,
@@ -65,6 +75,14 @@ export async function trade(
 
 export async function craft(payload: CraftRequest): Promise<CraftResponse> {
   const response = await apiRequest<CraftResponse>('/api/game/craft', { method: 'POST', body: payload })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
+export async function useItem(playerId: string, itemId: string): Promise<UseItemResponse> {
+  const response = await apiRequest<UseItemResponse>('/api/game/use-item', {
+    method: 'POST',
+    body: { player_id: playerId, item_id: itemId },
+  })
   return { ...response, profile: normalizeProfile(response.profile) }
 }
 

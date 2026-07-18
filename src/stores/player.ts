@@ -96,6 +96,26 @@ async function allocateAttributes(allocations: Record<string, number>): Promise<
   }
 }
 
+async function setEquipment(itemType: 'weapon' | 'armor', itemId: string | null): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.setEquipment({
+      player_id: playerId.value,
+      item_type: itemType,
+      item_id: itemId,
+    })
+    replaceProfile(response.profile)
+    useNotificationsStore().show(itemId ? '装备已经更新。' : '装备已经卸下。', 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '无法更新当前装备。', true)
+    return false
+  } finally {
+    busy.value = false
+  }
+}
+
 async function completeQuest(npcId: string, hookId: string): Promise<boolean> {
   if (!playerId.value) return false
   busy.value = true
@@ -174,6 +194,29 @@ async function craftItems(
   }
 }
 
+async function useItem(itemId: string): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.useItem(playerId.value, itemId)
+    replaceProfile(response.profile)
+    const restored = [
+      response.outcome.hp_restored ? `生命 +${response.outcome.hp_restored}` : '',
+      response.outcome.mp_restored ? `魔力 +${response.outcome.mp_restored}` : '',
+      response.outcome.stamina_restored ? `精力 +${response.outcome.stamina_restored}` : '',
+      response.outcome.cleared_statuses ? `净化 ${response.outcome.cleared_statuses} 个状态` : '',
+      response.outcome.applied_statuses.length ? `获得 ${response.outcome.applied_statuses.join('、')}` : '',
+    ].filter(Boolean).join('，')
+    useNotificationsStore().show(`物品已使用：${restored}。`, 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '当前无法使用这件物品。', true)
+    return false
+  } finally {
+    busy.value = false
+  }
+}
+
 function syncExploration(
   map: MapInstance,
   materials: Record<string, number>,
@@ -229,7 +272,7 @@ function syncCombat(snapshot: CombatSnapshot): void {
     ),
     equipped_weapon_id: isSecondPlayer ? state.ai_weapon?.id ?? null : state.player_weapon?.id ?? null,
     equipped_armor_id: isSecondPlayer ? state.ai_armor?.id ?? null : state.player_armor?.id ?? null,
-    equipped_item_id: isSecondPlayer ? state.ai_item_id : state.player_item_id,
+    equipped_item_id: null,
   })
 }
 
@@ -245,9 +288,11 @@ export function usePlayerStore() {
     clearSession,
     create,
     allocateAttributes,
+    setEquipment,
     completeQuest,
     tradeItem,
     craftItems,
+    useItem,
     syncExploration,
     syncCombat,
   }

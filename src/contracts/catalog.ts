@@ -1,6 +1,16 @@
 import type { CatalogId } from './common'
 import type { CharacterAttributes } from './player'
 
+export type ItemUseContext = 'combat' | 'exploration' | 'world_event'
+
+export interface ItemPolicyFields {
+  use_contexts: ItemUseContext[]
+  tradable: boolean
+  can_be_ingredient: boolean
+  category: string
+  tags: string[]
+}
+
 export interface CharacterDefinition {
   id: CatalogId
   name: string
@@ -55,7 +65,7 @@ export interface RaceDefinition {
   image_url?: string
 }
 
-export interface WeaponDefinition {
+export interface WeaponDefinition extends ItemPolicyFields {
   id: CatalogId
   name: string
   base_dmg: number
@@ -71,11 +81,10 @@ export interface WeaponDefinition {
   value: number
   desc: string
   image_url?: string
-  can_be_ingredient: boolean
   skills: SkillDefinition[]
 }
 
-export interface ArmorDefinition {
+export interface ArmorDefinition extends ItemPolicyFields {
   id: CatalogId
   name: string
   hp_bonus: number
@@ -88,10 +97,9 @@ export interface ArmorDefinition {
   value: number
   desc: string
   image_url?: string
-  can_be_ingredient: boolean
 }
 
-export interface ConsumableDefinition {
+export interface ConsumableDefinition extends ItemPolicyFields {
   id: CatalogId
   name: string
   type: 'heal_hp' | 'heal_mp' | 'heal_both' | 'dmg'
@@ -101,13 +109,20 @@ export interface ConsumableDefinition {
   status_effect?: string
   status_chance?: number
   clear_negative_statuses?: boolean
+  exploration_statuses?: Array<{
+    status_id: string
+    name: string
+    stacks: number
+    potency: number
+    remaining_turns: number
+    tags: string[]
+  }>
   value: number
   desc: string
   image_url?: string
-  can_be_ingredient: boolean
 }
 
-export interface ResourceDefinition {
+export interface ResourceDefinition extends ItemPolicyFields {
   id: CatalogId
   name: string
   emoji: string
@@ -116,7 +131,6 @@ export interface ResourceDefinition {
   value: number
   desc?: string
   image_url?: string
-  can_be_ingredient: boolean
 }
 
 export interface GameMeta {

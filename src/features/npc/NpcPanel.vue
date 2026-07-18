@@ -1,11 +1,7 @@
 <template>
   <section class="feature-stack npc-feature">
-    <div class="feature-intro">
-      <div>
-        <p class="eyebrow">THE LIVING WORLD</p>
-        <h2>世界人物</h2>
-        <p>每一次交谈都会更新关系、故事线与彼此记忆。</p>
-      </div>
+    <div class="feature-toolbar">
+      <small>追踪人物、任务线与世界事件</small>
       <span class="world-memory">世界记忆 {{ world.worldFacts.value.length }} 条</span>
     </div>
 
@@ -87,6 +83,8 @@
 
       <div v-else class="empty-state panel"><span v-if="world.busy.value" class="spinner" /><span v-else>◇</span><h3>{{ world.busy.value ? '人物档案正在展开' : '选择一位人物' }}</h3></div>
     </div>
+
+    <EventJournal />
   </section>
 </template>
 
@@ -94,6 +92,7 @@
 import { onMounted, ref } from 'vue'
 import { useCombatStore } from '../../stores/combat'
 import { useWorldStore } from '../../stores/world'
+import EventJournal from '../exploration/EventJournal.vue'
 
 const world = useWorldStore()
 const combat = useCombatStore()

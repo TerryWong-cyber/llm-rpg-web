@@ -53,6 +53,19 @@ function normalizeCraftingFlag(value: Record<string, unknown>): boolean {
   return value.can_be_ingredient !== false
 }
 
+function normalizeItemPolicy(value: Record<string, unknown>, fallbackCategory: string) {
+  const contexts = Array.isArray(value.use_contexts) ? value.use_contexts : []
+  return {
+    use_contexts: contexts.filter((item): item is 'combat' | 'exploration' | 'world_event' => (
+      item === 'combat' || item === 'exploration' || item === 'world_event'
+    )),
+    tradable: value.tradable !== false,
+    can_be_ingredient: normalizeCraftingFlag(value),
+    category: typeof value.category === 'string' ? value.category : fallbackCategory,
+    tags: Array.isArray(value.tags) ? value.tags.map(String) : [],
+  }
+}
+
 export function normalizeGameMeta(raw: unknown): GameMeta {
   const meta = raw as Partial<Record<keyof GameMeta, RawRecord>>
   return {
@@ -65,23 +78,23 @@ export function normalizeGameMeta(raw: unknown): GameMeta {
     weapons: normalizeRecord(meta.weapons, (value, id) => ({
       ...value,
       id,
-      can_be_ingredient: normalizeCraftingFlag(value),
+      ...normalizeItemPolicy(value, 'weapon'),
       skills: normalizeSkills(value.skills),
     }) as WeaponDefinition),
     armors: normalizeRecord(meta.armors, (value, id) => ({
       ...value,
       id,
-      can_be_ingredient: normalizeCraftingFlag(value),
+      ...normalizeItemPolicy(value, 'armor'),
     }) as ArmorDefinition),
     items: normalizeRecord(meta.items, (value, id) => ({
       ...value,
       id,
-      can_be_ingredient: normalizeCraftingFlag(value),
+      ...normalizeItemPolicy(value, 'item'),
     }) as ConsumableDefinition),
     resources: normalizeRecord(meta.resources, (value, id) => ({
       ...value,
       id,
-      can_be_ingredient: normalizeCraftingFlag(value),
+      ...normalizeItemPolicy(value, 'material'),
     }) as ResourceDefinition),
   }
 }

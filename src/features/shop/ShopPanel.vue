@@ -1,22 +1,14 @@
 <template>
   <section class="feature-stack">
-    <div class="feature-intro">
-      <div>
-        <p class="eyebrow">GILDED CROSSROADS</p>
-        <h2>鎏金集市</h2>
-        <p>集市只呈报交易意向，最终价格与库存由远境商会确认。</p>
-      </div>
-      <div class="coin-purse"><span>◈</span><strong>{{ profile?.gold ?? 0 }}</strong><small>可用金币</small></div>
-    </div>
-
     <article v-if="!exploration.shopAvailable.value" class="world-event world-event--danger">
       <span>🔒</span><div><p class="eyebrow">MARKET CLOSED</p><h3>商会当前不接受交易</h3><p>{{ exploration.state.value?.actions.shop.reason ?? '请先在白天抵达村庄或城镇。' }}</p></div>
     </article>
 
-    <nav class="segmented" aria-label="商店分类">
-      <button v-for="tab in tabs" :key="tab.id" type="button" :class="{ active: activeTab === tab.id }" @click="activeTab = tab.id">
+    <nav class="segmented inventory-tabs" aria-label="商店分类">
+      <span class="inventory-tabs__buttons"><button v-for="tab in tabs" :key="tab.id" type="button" :class="{ active: activeTab === tab.id }" @click="activeTab = tab.id">
         {{ tab.label }}
-      </button>
+      </button></span>
+      <strong class="inventory-tabs__gold">◈ {{ profile?.gold ?? 0 }} 金币</strong>
     </nav>
 
     <div class="shop-list">
@@ -25,7 +17,7 @@
         <div class="shop-row__copy">
           <h3>{{ item.name }}</h3>
           <p>{{ item.desc }}</p>
-          <small>持有 {{ item.owned }}</small>
+          <small>持有 {{ item.owned }} · {{ item.tradable ? '可交易' : '不可交易' }}</small>
         </div>
         <div class="shop-row__actions">
           <button class="button button--gold" type="button" :disabled="!exploration.shopAvailable.value || !canBuy(item) || player.busy.value" @click="trade('buy', item)">
@@ -50,7 +42,7 @@ import { useCatalogStore } from '../../stores/catalog'
 import { useExplorationStore } from '../../stores/exploration'
 import { usePlayerStore } from '../../stores/player'
 
-interface ShopItem { id: string; type: ItemType; name: string; desc: string; value: number; owned: number; icon: string; imageUrl?: string }
+interface ShopItem { id: string; type: ItemType; name: string; desc: string; value: number; owned: number; icon: string; imageUrl?: string; tradable: boolean; equipped: boolean }
 
 const player = usePlayerStore()
 const catalog = useCatalogStore()
@@ -73,27 +65,28 @@ const shopItems = computed<ShopItem[]>(() => {
   const inventory = profile.value?.inventory
   if (!meta || !inventory) return []
   if (activeTab.value === 'weapon') return Object.entries(meta.weapons).map(([id, item]) => ({
-    id, type: 'weapon', name: item.name, desc: item.desc, value: item.value, owned: count(inventory.weapons, id), icon: '⚔', imageUrl: item.image_url,
+    id, type: 'weapon', name: item.name, desc: item.desc, value: item.value, owned: count(inventory.weapons, id), icon: '⚔', imageUrl: item.image_url, tradable: item.tradable, equipped: profile.value?.equipped_weapon_id === id,
   }))
   if (activeTab.value === 'armor') return Object.entries(meta.armors).map(([id, item]) => ({
-    id, type: 'armor', name: item.name, desc: item.desc, value: item.value, owned: count(inventory.armors, id), icon: '◈', imageUrl: item.image_url,
+    id, type: 'armor', name: item.name, desc: item.desc, value: item.value, owned: count(inventory.armors, id), icon: '◈', imageUrl: item.image_url, tradable: item.tradable, equipped: profile.value?.equipped_armor_id === id,
   }))
   if (activeTab.value === 'item') return Object.entries(meta.items).map(([id, item]) => ({
-    id, type: 'item', name: item.name, desc: item.desc, value: item.value, owned: inventory.items[id] ?? 0, icon: '⚗', imageUrl: item.image_url,
+    id, type: 'item', name: item.name, desc: item.desc, value: item.value, owned: inventory.items[id] ?? 0, icon: '⚗', imageUrl: item.image_url, tradable: item.tradable, equipped: false,
   }))
   return Object.entries(meta.resources).filter(([id]) => (inventory.materials[id] ?? 0) > 0).map(([id, item]) => ({
-    id, type: 'material', name: item.name, desc: item.desc ?? '', value: item.value, owned: inventory.materials[id] ?? 0, icon: item.emoji || '✦', imageUrl: item.image_url,
+    id, type: 'material', name: item.name, desc: item.desc ?? '', value: item.value, owned: inventory.materials[id] ?? 0, icon: item.emoji || '✦', imageUrl: item.image_url, tradable: item.tradable, equipped: false,
   }))
 })
 
 function canBuy(item: ShopItem): boolean {
+  if (!item.tradable) return false
   if (item.type === 'material') return false
   if ((item.type === 'weapon' || item.type === 'armor') && item.owned > 0) return false
   return (profile.value?.gold ?? 0) >= item.value
 }
 
 function canSell(item: ShopItem): boolean {
-  if (!profile.value || item.owned <= 0) return false
+  if (!profile.value || item.owned <= 0 || !item.tradable || item.equipped) return false
   if (item.type === 'weapon') return profile.value.inventory.weapons.length > 1
   if (item.type === 'armor') return profile.value.inventory.armors.length > 1
   return true

@@ -117,8 +117,19 @@ export interface WorldEventAction {
   action_id: string
   label: string
   style: 'primary' | 'quiet' | 'danger'
-  kind: 'narrative' | 'open_npc' | 'start_quest' | 'npc_combat' | 'monster_combat'
+  kind: 'narrative' | 'open_npc' | 'start_quest' | 'npc_combat' | 'monster_combat' | 'use_item'
   forced: boolean
+  eligible_items: EventItemOption[]
+}
+
+export interface EventItemOption {
+  item_id: string
+  name: string
+  image_url: string
+  quantity: number
+  category: string
+  tags: string[]
+  match_score: number
 }
 
 export interface MonsterDefinition {
@@ -146,6 +157,7 @@ export interface EventActionResponse extends MapStateResponse {
     npc_id?: string
     monster_id?: string
     story_hook?: StoryHook
+    item_id?: string
   }
   combat: CombatStartResponse | null
 }
@@ -276,6 +288,7 @@ export interface EventActionRequest {
   player_id: string
   event_id: string
   action_id: string
+  item_id?: string
 }
 
 export interface GatherResponse extends MapStateResponse {

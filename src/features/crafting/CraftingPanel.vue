@@ -1,26 +1,22 @@
 <template>
   <section class="feature-stack">
-    <div class="feature-intro">
-      <div>
-        <p class="eyebrow">THE ALCHEMIST'S LEDGER</p>
-        <h2>星辉炼金台</h2>
-        <p>放入两件造物，由远境法则决定最终产物；失败不会消耗原料。</p>
-      </div>
+    <div class="feature-toolbar">
+      <small>失败不会消耗原料</small>
       <button class="button button--ghost" type="button" @click="openRecipes">炼金图鉴 {{ successRecipes.length }} 成功 · {{ failedRecipes.length }} 失败</button>
     </div>
 
     <div class="craft-board panel">
       <div class="craft-slots">
-        <button class="craft-slot" :class="{ filled: first }" type="button" @click="first = null">
+        <button class="craft-slot" :class="{ filled: first, 'drop-target-active': canAcceptSelected }" type="button" @dragover.prevent @drop.prevent="putSelected(0)" @click="first ? first = null : putSelected(0)">
           <ItemIcon class="craft-slot__icon" :image-url="first?.imageUrl" :fallback="first?.icon ?? '◇'" />
           <strong>{{ first?.name ?? '第一件原料' }}</strong>
-          <small>{{ first ? '点击取回' : '从下方行囊选择' }}</small>
+          <small>{{ first ? '点击取回' : '从旅人行囊拖入或选择' }}</small>
         </button>
         <span class="craft-plus" aria-hidden="true">✦</span>
-        <button class="craft-slot" :class="{ filled: second }" type="button" @click="second = null">
+        <button class="craft-slot" :class="{ filled: second, 'drop-target-active': canAcceptSelected }" type="button" @dragover.prevent @drop.prevent="putSelected(1)" @click="second ? second = null : putSelected(1)">
           <ItemIcon class="craft-slot__icon" :image-url="second?.imageUrl" :fallback="second?.icon ?? '◇'" />
           <strong>{{ second?.name ?? '第二件原料' }}</strong>
-          <small>{{ second ? '点击取回' : '从下方行囊选择' }}</small>
+          <small>{{ second ? '点击取回' : '从旅人行囊拖入或选择' }}</small>
         </button>
       </div>
       <button class="button button--primary button--large" type="button" :disabled="!first || !second || player.busy.value" @click="craft">
@@ -30,32 +26,12 @@
       <article v-if="result" class="craft-result">
         <ItemIcon v-if="result.image_url" class="craft-result__icon" :image-url="result.image_url" fallback="✧" />
         <span v-else class="craft-result__sigil">✧</span>
-        <div><p class="eyebrow">NEW CREATION</p><h3>{{ result.name }}</h3><p>{{ result.desc }}</p><small>{{ labelFor(result.item_type) }} · 估值 ◈ {{ result.value }} · 战斗属性 {{ result.combat_stat }} · {{ result.can_be_ingredient ? '可继续作为原料' : '完整成品，不可继续炼制' }}</small></div>
+        <div><p class="eyebrow">NEW CREATION</p><h3>{{ result.name }}</h3><p>{{ result.desc }}</p><small>{{ labelFor(result.item_type) }} · 估值 ◈ {{ result.value }} · 战斗属性 {{ result.combat_stat }} · {{ result.tradable ? '可交易' : '不可交易' }} · {{ result.can_be_ingredient ? '可继续作为原料' : '完整成品，不可继续炼制' }} · 场景 {{ result.use_contexts.join(' / ') || '无' }} · 标签 {{ result.tags.join('、') || '无' }}</small></div>
       </article>
       <article v-else-if="failureReason" class="craft-result craft-result--failed">
         <span class="craft-result__sigil">×</span>
         <div><p class="eyebrow">INCOMPATIBLE FORMULA</p><h3>炼成失败</h3><p>{{ failureReason }}</p><small>原料未被消耗，该结论已记录到全局图鉴。</small></div>
       </article>
-    </div>
-
-    <div>
-      <nav class="segmented" aria-label="炼金原料分类">
-        <button v-for="tab in tabs" :key="tab.id" type="button" :class="{ active: activeTab === tab.id }" @click="activeTab = tab.id">{{ tab.label }}</button>
-      </nav>
-      <div v-if="availableItems.length" class="ingredient-grid">
-        <button
-          v-for="item in availableItems"
-          :key="`${item.type}-${item.id}`"
-          class="ingredient"
-          :class="{ 'ingredient--disabled': item.disabled }"
-          type="button"
-          :disabled="item.disabled"
-          @click="putInSlot(item)"
-        >
-          <ItemIcon :image-url="item.imageUrl" :fallback="item.icon" /><strong>{{ item.name }}</strong><small v-if="item.disabledReason">{{ item.disabledReason }}</small><small v-else>可用 {{ item.count }} · ◈ {{ item.value }}</small>
-        </button>
-      </div>
-      <div v-else class="empty-state empty-state--compact"><span>◇</span><p>当前分类中没有物品。</p></div>
     </div>
 
     <div v-if="showRecipes" class="modal-backdrop" role="presentation" @click.self="showRecipes = false">
@@ -100,22 +76,15 @@ import type { CraftResult, ItemType } from '../../contracts'
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCatalogStore } from '../../stores/catalog'
 import { usePlayerStore } from '../../stores/player'
+import { useItemTransferStore, type TransferItem } from '../../stores/itemTransfer'
+import { useNotificationsStore } from '../../stores/notifications'
 
-interface Ingredient {
-  id: string
-  type: ItemType
-  name: string
-  count: number
-  value: number
-  icon: string
-  imageUrl?: string
-  disabled: boolean
-  disabledReason: string
-}
+type Ingredient = TransferItem
 
 const player = usePlayerStore()
 const catalog = useCatalogStore()
-const activeTab = ref<ItemType>('material')
+const transfer = useItemTransferStore()
+const notifications = useNotificationsStore()
 const first = ref<Ingredient | null>(null)
 const second = ref<Ingredient | null>(null)
 const result = ref<CraftResult | null>(null)
@@ -123,13 +92,6 @@ const failureReason = ref('')
 const showRecipes = ref(false)
 const successRecipes = computed(() => catalog.recipes.value.filter((recipe) => recipe.success && recipe.result))
 const failedRecipes = computed(() => catalog.recipes.value.filter((recipe) => !recipe.success))
-const tabs: Array<{ id: ItemType; label: string }> = [
-  { id: 'material', label: '素材' },
-  { id: 'item', label: '药剂' },
-  { id: 'weapon', label: '武器' },
-  { id: 'armor', label: '护甲' },
-]
-
 function tally(ids: readonly string[]): Record<string, number> {
   return ids.reduce<Record<string, number>>((result, id) => {
     result[id] = (result[id] ?? 0) + 1
@@ -141,70 +103,43 @@ function selectedCount(type: ItemType, id?: string): number {
   return [first.value, second.value].filter((item) => item?.type === type && (!id || item.id === id)).length
 }
 
-const availableItems = computed<Ingredient[]>(() => {
+function ownedCount(item: Ingredient): number {
   const inventory = player.profile.value?.inventory
-  const meta = catalog.meta.value
-  if (!inventory || !meta) return []
+  if (!inventory) return 0
+  if (item.type === 'weapon' || item.type === 'armor') return tally(inventory[item.type === 'weapon' ? 'weapons' : 'armors'])[item.id] ?? 0
+  return inventory[item.type === 'item' ? 'items' : 'materials'][item.id] ?? 0
+}
 
-  if (activeTab.value === 'weapon' || activeTab.value === 'armor') {
-    const type = activeTab.value
-    const ids = type === 'weapon' ? inventory.weapons : inventory.armors
-    const totalRemaining = ids.length - selectedCount(type)
-    return Object.entries(tally(ids)).flatMap(([id, rawCount]) => {
-      const item = catalog.itemSummary(type, id)
-      const count = rawCount - selectedCount(type, id)
-      if (!item || rawCount <= 0) return []
-      const disabledReason = !item.canBeIngredient
-        ? '完整成品，不可作为原料'
-        : count <= 0
-          ? '已放入炼金台'
-          : totalRemaining <= 1
-            ? `必须保留一件${type === 'weapon' ? '武器' : '护甲'}`
-            : ''
-      return [{
-        id,
-        type,
-        name: item.name,
-        count: Math.max(0, count),
-        value: item.value,
-        icon: type === 'weapon' ? '⚔' : '◈',
-        imageUrl: item.imageUrl,
-        disabled: Boolean(disabledReason),
-        disabledReason,
-      }]
-    })
+function rejectionReason(item: Ingredient | null): string {
+  if (!item) return '请先在旅人行囊中选择物品'
+  const equipped = item.type === 'weapon'
+    ? player.profile.value?.equipped_weapon_id === item.id
+    : item.type === 'armor' && player.profile.value?.equipped_armor_id === item.id
+  if (item.equipped || equipped) return '正在装备的物品需先卸下'
+  if (!item.canBeIngredient) return '这件物品不可作为炼金原料'
+  if (ownedCount(item) - selectedCount(item.type, item.id) <= 0) return '该物品已全部放入炼金台'
+  if ((item.type === 'weapon' || item.type === 'armor')) {
+    const inventory = player.profile.value?.inventory
+    const total = item.type === 'weapon' ? inventory?.weapons.length ?? 0 : inventory?.armors.length ?? 0
+    if (total - selectedCount(item.type) <= 1) return `必须保留一件${item.type === 'weapon' ? '武器' : '护甲'}`
   }
+  return ''
+}
 
-  const quantities = activeTab.value === 'item' ? inventory.items : inventory.materials
-  return Object.entries(quantities).flatMap(([id, rawCount]) => {
-    const item = catalog.itemSummary(activeTab.value, id)
-    const count = rawCount - selectedCount(activeTab.value, id)
-    if (!item || rawCount <= 0) return []
-    const disabledReason = !item.canBeIngredient
-      ? '完整成品，不可作为原料'
-      : count <= 0
-        ? '已放入炼金台'
-        : ''
-    return [{
-      id,
-      type: activeTab.value,
-      name: item.name,
-      count: Math.max(0, count),
-      value: item.value,
-      icon: activeTab.value === 'item' ? '⚗' : (item.emoji || '✦'),
-      imageUrl: item.imageUrl,
-      disabled: Boolean(disabledReason),
-      disabledReason,
-    }]
-  })
-})
+const canAcceptSelected = computed(() => !rejectionReason(transfer.selected.value))
 
-function putInSlot(item: Ingredient): void {
-  if (item.disabled) return
+function putSelected(index: 0 | 1): void {
+  const item = transfer.selected.value
+  const reason = rejectionReason(item)
+  if (!item || reason) {
+    notifications.show(reason, 'warning')
+    return
+  }
   result.value = null
   failureReason.value = ''
-  if (!first.value) first.value = item
-  else if (!second.value) second.value = item
+  if (index === 0) first.value = { ...item }
+  else second.value = { ...item }
+  transfer.clear()
 }
 
 async function craft(): Promise<void> {
@@ -218,7 +153,6 @@ async function craft(): Promise<void> {
   }
   result.value = attempt.result
   failureReason.value = ''
-  activeTab.value = attempt.result.item_type
   first.value = null
   second.value = null
 }

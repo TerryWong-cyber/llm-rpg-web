@@ -130,6 +130,7 @@ export interface PrepMessage {
 export interface CombatActionMessage {
   action: 'combat'
   action_key: '0' | '9' | 'i' | string
+  item_id?: string
 }
 
 export type CombatClientMessage = PrepMessage | CombatActionMessage
