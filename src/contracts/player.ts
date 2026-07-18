@@ -5,19 +5,92 @@ export interface PlayerProfile {
   player_id: string
   name: string
   character_id: string
+  race_id: string
+  level: number
+  experience: number
+  experience_to_next: number
+  total_experience: number
+  attribute_points: number
+  attributes: CharacterAttributes
+  active_quests: Record<string, QuestProgress>
+  completed_quests: string[]
   gold: number
   inventory: Inventory
+  current_hp: number
+  max_hp: number
+  current_mp: number
+  max_mp: number
   stamina: number
   max_stamina: number
+  combat_statuses: CombatStatus[]
+  psychological_traits: string[]
+  equipped_weapon_id?: string | null
+  equipped_armor_id?: string | null
+  equipped_item_id?: string | null
   world_seed?: number | null
   current_map: MapInstance | null
   world_maps?: Record<string, MapInstance>
   last_camped_game_day?: number | null
 }
 
+export interface CharacterAttributes {
+  vitality: number
+  strength: number
+  agility: number
+  wisdom: number
+  luck: number
+}
+
+export interface QuestRequirement {
+  kind: 'inventory' | 'region'
+  description: string
+  item_type?: 'item' | 'material' | null
+  item_id?: string | null
+  quantity?: number
+  consume?: boolean
+  region_id?: string | null
+}
+
+export interface QuestProgress {
+  hook_id: string
+  npc_id: string
+  title: string
+  summary: string
+  xp_reward: number
+  requirements: QuestRequirement[]
+}
+
+export interface ProgressionView {
+  race_id: string
+  level: number
+  experience: number
+  total_experience: number
+  experience_to_next: number
+  attribute_points: number
+  attributes: CharacterAttributes
+}
+
+export interface CombatStatus {
+  status_id: string
+  name: string
+  source_id: string
+  stacks: number
+  potency: number
+  remaining_turns: number
+  persistent: boolean
+  tags: string[]
+}
+
 export interface CreateCharacterRequest {
   name: string
-  character_id: string
+  race_id: string
+}
+
+export interface ProfileUpdateResponse {
+  status: 'success'
+  profile: PlayerProfile
+  progression?: ProgressionView
+  reward?: { experience: number; levels_gained: number; level: number; attribute_points: number }
 }
 
 export interface CreateCharacterResponse {

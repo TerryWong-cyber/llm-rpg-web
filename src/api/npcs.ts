@@ -6,7 +6,7 @@ import type {
   PublicNpc,
 } from '../contracts'
 import { apiRequest } from './client'
-import { normalizeCombatSnapshot } from './normalizers'
+import { normalizeCombatSnapshot, normalizeProfile } from './normalizers'
 
 export function getNpcs(query: { terrain_id?: string; cell_id?: number } = {}): Promise<{ npcs: PublicNpc[] }> {
   return apiRequest('/api/world/npcs', { query })
@@ -16,11 +16,12 @@ export function getNpc(npcId: string, playerId: string): Promise<{ npc: PublicNp
   return apiRequest(`/api/world/npcs/${encodeURIComponent(npcId)}`, { query: { player_id: playerId } })
 }
 
-export function dialogue(npcId: string, playerId: string, message: string): Promise<NpcDialogueResponse> {
-  return apiRequest(`/api/world/npcs/${encodeURIComponent(npcId)}/dialogue`, {
+export async function dialogue(npcId: string, playerId: string, message: string): Promise<NpcDialogueResponse> {
+  const response = await apiRequest<NpcDialogueResponse>(`/api/world/npcs/${encodeURIComponent(npcId)}/dialogue`, {
     method: 'POST',
     body: { player_id: playerId, message },
   })
+  return { ...response, profile: normalizeProfile(response.profile) }
 }
 
 export function getNpcMemories(npcId: string, playerId: string): Promise<{ npc_id: string; memories: MemoryEntry[] }> {

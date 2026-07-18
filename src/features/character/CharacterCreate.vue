@@ -3,7 +3,7 @@
     <div class="entry-story">
       <p class="eyebrow">A NEW CHAPTER</p>
       <h1>远境旅人志</h1>
-      <p class="entry-story__lead">选择你的起点。每一次探索、相遇与交锋，都将由世界真实记住。</p>
+      <p class="entry-story__lead">选择血脉与出生国度，而不是预先决定职业。你的道路将由升级、加点、装备与经历共同塑造。</p>
       <div class="entry-story__runes" aria-hidden="true"><span>✦</span><span>⌁</span><span>✧</span></div>
     </div>
 
@@ -23,21 +23,25 @@
       </label>
 
       <fieldset class="character-picker">
-        <legend>选择初始契约</legend>
+        <legend>选择种族与出生国度</legend>
         <label
-          v-for="(character, id) in meta?.characters"
+          v-for="(race, id) in meta?.races"
           :key="id"
           class="character-option"
           :class="{ 'character-option--selected': selectedId === id }"
         >
           <input v-model="selectedId" type="radio" :value="id" />
-          <ItemIcon class="character-option__sigil" :image-url="character.image_url" :fallback="sigilFor(String(id))" />
+          <ItemIcon class="character-option__sigil" :image-url="race.image_url" :fallback="sigilFor(String(id))" />
           <span class="character-option__body">
-            <strong>{{ character.name }}</strong>
-            <small>{{ character.desc }}</small>
+            <strong>{{ race.name }}</strong>
+            <small>{{ race.background }}</small>
             <span class="character-option__stats">
-              <b>体 {{ character.hp }}</b><b>力 {{ character.str }}</b><b>敏 {{ character.agi }}</b><b>智 {{ character.int }}</b>
+              <b>体 {{ race.base_attributes.vitality }}</b><b>力 {{ race.base_attributes.strength }}</b><b>敏 {{ race.base_attributes.agility }}</b><b>智 {{ race.base_attributes.wisdom }}</b><b>运 {{ race.base_attributes.luck }}</b>
             </span>
+            <span class="race-origin">⌂ {{ race.birthplace.settlement_name }} · {{ race.nation }}</span>
+            <span class="race-features"><i>特长</i>{{ race.strengths.join('；') }}</span>
+            <span class="race-features race-features--weak"><i>弱点</i>{{ race.weaknesses.join('；') }}</span>
+            <span v-if="race.exclusive_skills[0]" class="race-skill">专属技能 · {{ race.exclusive_skills[0].name }}：{{ race.exclusive_skills[0].desc }}</span>
           </span>
         </label>
       </fieldset>
@@ -55,14 +59,14 @@ import type { GameMeta } from '../../contracts'
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 
 const props = defineProps<{ meta: GameMeta | null; busy: boolean }>()
-const emit = defineEmits<{ create: [payload: { name: string; characterId: string }] }>()
+const emit = defineEmits<{ create: [payload: { name: string; raceId: string }] }>()
 
 const name = ref('')
 const selectedId = ref('')
 const valid = computed(() => name.value.length >= 1 && name.value.length <= 40 && Boolean(selectedId.value))
 
 watch(() => props.meta, (meta) => {
-  if (!selectedId.value && meta) selectedId.value = Object.keys(meta.characters)[0] ?? ''
+  if (!selectedId.value && meta) selectedId.value = Object.keys(meta.races)[0] ?? ''
 }, { immediate: true })
 
 function sigilFor(id: string): string {
@@ -72,6 +76,6 @@ function sigilFor(id: string): string {
 
 function submit(): void {
   if (!valid.value) return
-  emit('create', { name: name.value, characterId: selectedId.value })
+  emit('create', { name: name.value, raceId: selectedId.value })
 }
 </script>

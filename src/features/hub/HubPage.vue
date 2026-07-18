@@ -8,6 +8,7 @@
 
     <main class="hub-content">
       <ExplorationPanel v-if="modelValue === 'explore'" @encounter="openEncounter" @shop="openShop" />
+      <GrowthPanel v-else-if="modelValue === 'growth'" />
       <NpcPanel v-else-if="modelValue === 'npcs'" />
       <RoomPanel v-else-if="modelValue === 'battle'" />
       <InventoryPanel v-else-if="modelValue === 'inventory'" />
@@ -20,6 +21,7 @@
 <script setup lang="ts">
 import CraftingPanel from '../crafting/CraftingPanel.vue'
 import ExplorationPanel from '../exploration/ExplorationPanel.vue'
+import GrowthPanel from '../character/GrowthPanel.vue'
 import InventoryPanel from '../inventory/InventoryPanel.vue'
 import NpcPanel from '../npc/NpcPanel.vue'
 import RoomPanel from '../combat/RoomPanel.vue'
@@ -27,7 +29,7 @@ import ShopPanel from '../shop/ShopPanel.vue'
 import { useExplorationStore } from '../../stores/exploration'
 import { useWorldStore } from '../../stores/world'
 
-export type HubTab = 'explore' | 'npcs' | 'battle' | 'inventory' | 'shop' | 'craft'
+export type HubTab = 'explore' | 'growth' | 'npcs' | 'battle' | 'inventory' | 'shop' | 'craft'
 
 const props = defineProps<{ modelValue: HubTab }>()
 const emit = defineEmits<{ 'update:modelValue': [tab: HubTab] }>()
@@ -35,6 +37,7 @@ const exploration = useExplorationStore()
 const world = useWorldStore()
 const tabs: Array<{ id: HubTab; icon: string; label: string; hint: string }> = [
   { id: 'explore', icon: '⌖', label: '荒野探索', hint: '移动与采集' },
+  { id: 'growth', icon: '✦', label: '角色成长', hint: '升级与加点' },
   { id: 'npcs', icon: '♙', label: '世界人物', hint: '对话与记忆' },
   { id: 'battle', icon: '⚔', label: '战备大厅', hint: 'PvE / PvP' },
   { id: 'inventory', icon: '◇', label: '旅人行囊', hint: '查看库存' },

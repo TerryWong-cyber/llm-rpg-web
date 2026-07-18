@@ -61,12 +61,12 @@ function clearSession(): void {
   useNotificationsStore().clearSessionIssue()
 }
 
-async function create(name: string, characterId: string): Promise<boolean> {
+async function create(name: string, raceId: string): Promise<boolean> {
   busy.value = true
   try {
     const response = await gameApi.createCharacter({
       name: name.trim(),
-      character_id: String(characterId),
+      race_id: String(raceId),
     })
     replaceProfile(response.profile)
     restoredFromCache.value = false
@@ -74,6 +74,40 @@ async function create(name: string, characterId: string): Promise<boolean> {
     return true
   } catch (error) {
     useNotificationsStore().capture(error, '角色档案创建失败。')
+    return false
+  } finally {
+    busy.value = false
+  }
+}
+
+async function allocateAttributes(allocations: Record<string, number>): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.allocateAttributes(playerId.value, allocations)
+    replaceProfile(response.profile)
+    useNotificationsStore().show('属性点已经写入旅人档案。', 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '属性加点未能完成。')
+    return false
+  } finally {
+    busy.value = false
+  }
+}
+
+async function completeQuest(npcId: string, hookId: string): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.completeQuest(playerId.value, npcId, hookId)
+    replaceProfile(response.profile)
+    const reward = response.reward
+    const levelText = reward?.levels_gained ? `，提升至 ${reward.level} 级` : ''
+    useNotificationsStore().show(`任务完成，获得 ${reward?.experience ?? 0} 经验${levelText}。`, 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '任务目标尚未全部满足。')
     return false
   } finally {
     busy.value = false
@@ -149,9 +183,17 @@ function syncExploration(
   replaceProfile({
     ...profile.value,
     current_map: map,
+    current_hp: explorationPlayer?.current_hp ?? profile.value.current_hp,
+    max_hp: explorationPlayer?.max_hp ?? profile.value.max_hp,
+    current_mp: explorationPlayer?.current_mp ?? profile.value.current_mp,
+    max_mp: explorationPlayer?.max_mp ?? profile.value.max_mp,
     stamina: explorationPlayer?.stamina ?? profile.value.stamina,
     max_stamina: explorationPlayer?.max_stamina ?? profile.value.max_stamina,
+    combat_statuses: explorationPlayer?.combat_statuses ?? profile.value.combat_statuses,
     last_camped_game_day: explorationPlayer?.last_camped_game_day ?? profile.value.last_camped_game_day,
+    ...(explorationPlayer?.progression ?? {}),
+    active_quests: explorationPlayer?.active_quests ?? profile.value.active_quests,
+    completed_quests: explorationPlayer?.completed_quests ?? profile.value.completed_quests,
     inventory: {
       ...profile.value.inventory,
       materials: { ...materials },
@@ -170,7 +212,25 @@ function syncCombat(snapshot: CombatSnapshot): void {
     ? normalizeInventory(state.ai_inventory)
     : normalizeInventory(state.player_inventory)
   const gold = isSecondPlayer ? state.ai_gold : state.player_gold
-  replaceProfile({ ...profile.value, gold, inventory })
+  const progression = isSecondPlayer ? state.ai_progression : state.player_progression
+  replaceProfile({
+    ...profile.value,
+    gold,
+    ...(progression ?? {}),
+    inventory,
+    current_hp: isSecondPlayer ? state.ai_hp : state.player_hp,
+    max_hp: isSecondPlayer ? state.ai_max_hp : state.player_max_hp,
+    current_mp: isSecondPlayer ? state.ai_mp : state.player_mp,
+    max_mp: isSecondPlayer ? state.ai_max_mp : state.player_max_mp,
+    stamina: isSecondPlayer ? state.ai_stamina : state.player_stamina,
+    max_stamina: isSecondPlayer ? state.ai_max_stamina : state.player_max_stamina,
+    combat_statuses: (isSecondPlayer ? state.ai_statuses : state.player_statuses).filter(
+      (status) => status.persistent,
+    ),
+    equipped_weapon_id: isSecondPlayer ? state.ai_weapon?.id ?? null : state.player_weapon?.id ?? null,
+    equipped_armor_id: isSecondPlayer ? state.ai_armor?.id ?? null : state.player_armor?.id ?? null,
+    equipped_item_id: isSecondPlayer ? state.ai_item_id : state.player_item_id,
+  })
 }
 
 export function usePlayerStore() {
@@ -184,6 +244,8 @@ export function usePlayerStore() {
     replaceProfile,
     clearSession,
     create,
+    allocateAttributes,
+    completeQuest,
     tradeItem,
     craftItems,
     syncExploration,

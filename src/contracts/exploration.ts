@@ -2,6 +2,7 @@ import type { MapScale } from './common'
 import type { ResourceDefinition } from './catalog'
 import type { CombatStartResponse } from './combat'
 import type { PublicNpc, StoryHook } from './npc'
+import type { CombatStatus, ProgressionView, QuestProgress } from './player'
 
 export type MoveDirection = 'up' | 'down' | 'left' | 'right'
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter'
@@ -211,10 +212,18 @@ export interface MapTransition {
 }
 
 export interface ExplorationPlayerState {
+  current_hp: number
+  max_hp: number
+  current_mp: number
+  max_mp: number
   stamina: number
   max_stamina: number
+  combat_statuses: CombatStatus[]
   inventory_items: Record<string, number>
   last_camped_game_day: number | null
+  progression: ProgressionView
+  active_quests: Record<string, QuestProgress>
+  completed_quests: string[]
 }
 
 export interface MapStateResponse {
@@ -226,7 +235,7 @@ export interface MapStateResponse {
   player: ExplorationPlayerState
   world: WorldOverview
   world_time: WorldTimeSnapshot
-  actions: Record<'gather' | 'camp' | 'shop' | 'eat', ActionAvailability>
+  actions: Record<'gather' | 'camp' | 'inn' | 'shop' | 'eat', ActionAvailability>
   encounter: EncounterResult | null
   event: WorldEventResult | null
   event_log: WorldEventLogEntry[]

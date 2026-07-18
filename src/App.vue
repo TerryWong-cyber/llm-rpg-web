@@ -9,7 +9,12 @@
         <ItemIcon class="header-profile__avatar item-icon--portrait" :image-url="playerAvatarUrl" :fallback="playerInitial" />
         <span class="header-profile__identity">
           <strong class="header-profile__name">{{ player.profile.value?.name }}</strong>
-          <small>{{ playerCharacterName }}</small>
+          <small>Lv.{{ player.profile.value?.level ?? 1 }} · {{ playerRaceName }} · {{ globalStatus }}</small>
+        </span>
+        <span class="header-profile__resources" aria-label="角色全局资源">
+          <small class="resource-pill resource-pill--hp">♥ {{ player.profile.value?.current_hp ?? 0 }}/{{ player.profile.value?.max_hp ?? 0 }}</small>
+          <small class="resource-pill resource-pill--mp">✦ {{ player.profile.value?.current_mp ?? 0 }}/{{ player.profile.value?.max_mp ?? 0 }}</small>
+          <small class="resource-pill resource-pill--stamina">⚡ {{ player.profile.value?.stamina ?? 0 }}/{{ player.profile.value?.max_stamina ?? 0 }}</small>
         </span>
         <span class="header-profile__gold">◈ {{ player.profile.value?.gold ?? 0 }}</span>
         <button class="button button--quiet" type="button" @click="restartSession">新建旅程</button>
@@ -89,16 +94,19 @@ const world = useWorldStore()
 const notifications = useNotificationsStore()
 const hubTab = ref<HubTab>('explore')
 const showAssetCredits = ref(false)
-const playerCharacter = computed(() => {
-  const id = player.profile.value?.character_id
-  return id ? catalog.meta.value?.characters[id] : undefined
+const playerRace = computed(() => {
+  const id = player.profile.value?.race_id
+  return id ? catalog.meta.value?.races[id] : undefined
 })
-const playerAvatarUrl = computed(() => playerCharacter.value?.image_url ?? '')
-const playerCharacterName = computed(() => playerCharacter.value?.name ?? '未记录的旅人')
+const playerAvatarUrl = computed(() => playerRace.value?.image_url ?? '')
+const playerRaceName = computed(() => playerRace.value?.name ?? '未记录的旅人')
+const globalStatus = computed(() => (
+  player.profile.value?.combat_statuses?.map((status) => status.name).join('、') || '状态正常'
+))
 const playerInitial = computed(() => player.profile.value?.name?.slice(0, 1) || '旅')
 
-async function createCharacter(payload: { name: string; characterId: string }): Promise<void> {
-  if (await player.create(payload.name, payload.characterId)) hubTab.value = 'explore'
+async function createCharacter(payload: { name: string; raceId: string }): Promise<void> {
+  if (await player.create(payload.name, payload.raceId)) hubTab.value = 'explore'
 }
 
 function restartSession(): void {

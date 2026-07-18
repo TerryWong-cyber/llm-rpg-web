@@ -32,14 +32,8 @@
 
       <div class="map-controls panel">
         <template v-if="!exploration.state.value">
-          <label>初始地域
-            <select v-model="selectedTemplate" aria-label="初始地图地域">
-              <option v-for="template in exploration.templates.value?.templates" :key="template.template_id" :value="template.template_id">
-                {{ templateName(template) }} · 16×16
-              </option>
-            </select>
-          </label>
-          <button class="button button--primary" type="button" :disabled="exploration.busy.value" @click="enterSelected(false)">展开世界</button>
+          <p>出生地域由种族与国度决定，你会从拥有商人与旅馆的出生城镇开始旅程。</p>
+          <button class="button button--primary" type="button" :disabled="exploration.busy.value" @click="enterSelected(false)">前往出生城镇</button>
         </template>
         <template v-else>
           <div class="map-region-card">
@@ -163,6 +157,7 @@
             {{ exploration.busy.value ? '正在行动…' : `采集 · ${gatherCost} 精力` }}
           </button>
           <button class="button button--ghost" type="button" :disabled="!canCamp" :title="campReason" @click="exploration.camp">⛺ 扎营休息</button>
+          <button v-if="exploration.currentCell.value?.interaction_ids.includes('inn')" class="button button--gold" type="button" :disabled="!exploration.innAvailable.value || exploration.busy.value" :title="innReason" @click="exploration.restAtInn">♨ 旅店休整</button>
           <select v-if="foodItems.length" v-model="selectedFood" aria-label="选择食物" :disabled="!exploration.state.value.actions.eat.available">
             <option v-for="food in foodItems" :key="food.id" :value="food.id">{{ food.name }} ×{{ food.count }}（+{{ food.restore }}）</option>
           </select>
@@ -219,7 +214,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import type { MapCell, MapTemplate, MoveDirection } from '../../contracts'
+import type { MapCell, MoveDirection } from '../../contracts'
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCatalogStore } from '../../stores/catalog'
 import { useCombatStore } from '../../stores/combat'
@@ -231,7 +226,6 @@ const exploration = useExplorationStore()
 const player = usePlayerStore()
 const catalog = useCatalogStore()
 const combat = useCombatStore()
-const selectedTemplate = ref('')
 const selectedFood = ref('')
 const mapScroll = ref<HTMLElement | null>(null)
 
@@ -249,12 +243,6 @@ watch(
   },
   { flush: 'post' },
 )
-
-watch(() => exploration.templates.value?.templates, (templates) => {
-  if (!selectedTemplate.value && templates?.length) {
-    selectedTemplate.value = player.profile.value?.current_map?.template_id ?? templates.find((item) => item.region_id === 'mistwood')?.template_id ?? templates[0].template_id
-  }
-}, { immediate: true })
 
 const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${exploration.state.value?.map.width ?? 1}, minmax(2.43rem, 1fr))`,
@@ -285,11 +273,11 @@ const neighborRegions = computed(() => {
   })
 })
 const currentTerrain = computed(() => terrain(exploration.currentCell.value?.terrain_id))
-const playerCharacter = computed(() => {
-  const id = player.profile.value?.character_id
-  return id ? catalog.meta.value?.characters[id] : undefined
+const playerRace = computed(() => {
+  const id = player.profile.value?.race_id
+  return id ? catalog.meta.value?.races[id] : undefined
 })
-const playerAvatarUrl = computed(() => playerCharacter.value?.image_url ?? '')
+const playerAvatarUrl = computed(() => playerRace.value?.image_url ?? '')
 const playerInitial = computed(() => player.profile.value?.name?.slice(0, 1) || '旅')
 const currentTime = exploration.currentWorldTime
 const stamina = computed(() => exploration.state.value?.player.stamina ?? player.profile.value?.stamina ?? 0)
@@ -304,6 +292,7 @@ const canGather = computed(() => Boolean(exploration.gatherAvailable.value && !e
 const canCamp = computed(() => Boolean(exploration.campAvailable.value && !exploration.busy.value))
 const gatherReason = computed(() => exploration.state.value?.actions.gather.reason ?? '')
 const campReason = computed(() => exploration.state.value?.actions.camp.reason ?? '')
+const innReason = computed(() => exploration.state.value?.actions.inn.reason ?? '')
 const shopReason = computed(() => exploration.shopAvailable.value ? '' : (exploration.state.value?.actions.shop.reason || '商店当前未营业'))
 const gatherCost = computed(() => exploration.state.value?.actions.gather.cost ?? 0)
 const regionName = computed(() => currentRegion.value?.name ?? exploration.state.value?.map.region_id ?? 'UNCHARTED REGION')
@@ -370,9 +359,6 @@ const availableResources = computed(() => {
   })
 })
 
-function templateName(template: MapTemplate): string {
-  return exploration.templates.value?.regions[template.region_id]?.name ?? template.region_id
-}
 function terrain(id?: string) { return id ? exploration.state.value?.terrains_meta[id] ?? null : null }
 function regionIcon(id: string): { imageUrl: string } {
   const images = {
@@ -434,7 +420,7 @@ function directionDisabled(direction: MoveDirection): boolean {
   return worldX < 0 || worldX >= map.world_width || worldY < 0 || worldY >= map.world_height
 }
 async function enterSelected(refresh: boolean): Promise<void> {
-  const template = refresh ? exploration.state.value?.map.template_id : selectedTemplate.value
+  const template = refresh ? exploration.state.value?.map.template_id : undefined
   const encounter = await exploration.enter(template || undefined, refresh)
   if (encounter) emit('encounter', encounter.npc_id)
 }
@@ -497,7 +483,6 @@ function handleKeydown(event: KeyboardEvent): void {
 onMounted(async () => {
   window.addEventListener('keydown', handleKeydown)
   await exploration.loadTemplates()
-  if (!selectedTemplate.value) selectedTemplate.value = player.profile.value?.current_map?.template_id ?? exploration.templates.value?.templates.find((item) => item.region_id === 'mistwood')?.template_id ?? ''
   if (!exploration.state.value) await enterSelected(false)
 })
 onUnmounted(() => window.removeEventListener('keydown', handleKeydown))

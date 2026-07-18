@@ -45,6 +45,13 @@ export async function camp(playerId: string): Promise<RestResponse> {
   })) as RestResponse
 }
 
+export async function restAtInn(playerId: string): Promise<RestResponse> {
+  return normalizeMapState(await apiRequest('/api/map/inn', {
+    method: 'POST',
+    body: { player_id: playerId },
+  })) as RestResponse
+}
+
 export async function eventAction(payload: EventActionRequest): Promise<EventActionResponse> {
   const response = await apiRequest<EventActionResponse>('/api/map/event-action', {
     method: 'POST',

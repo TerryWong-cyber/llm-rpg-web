@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
   label: string
   value: number
   maximum?: number
-  tone?: 'health' | 'mana' | 'gold'
+  tone?: 'health' | 'mana' | 'stamina' | 'gold'
 }>(), {
   maximum: 0,
   tone: 'health',

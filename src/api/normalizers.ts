@@ -10,6 +10,7 @@ import type {
   MapStateResponse,
   PlayerProfile,
   ResourceDefinition,
+  RaceDefinition,
   SkillDefinition,
   WeaponDefinition,
 } from '../contracts'
@@ -56,6 +57,11 @@ export function normalizeGameMeta(raw: unknown): GameMeta {
   const meta = raw as Partial<Record<keyof GameMeta, RawRecord>>
   return {
     characters: normalizeRecord(meta.characters, (value, id) => ({ ...value, id }) as CharacterDefinition),
+    races: normalizeRecord(meta.races, (value, id) => ({
+      ...value,
+      id,
+      exclusive_skills: normalizeSkills(value.exclusive_skills),
+    }) as RaceDefinition),
     weapons: normalizeRecord(meta.weapons, (value, id) => ({
       ...value,
       id,
@@ -85,9 +91,33 @@ export function normalizeProfile(profile: PlayerProfile): PlayerProfile {
     ...profile,
     player_id: String(profile.player_id),
     character_id: String(profile.character_id),
+    race_id: String(profile.race_id ?? '1'),
+    level: Number(profile.level ?? 1),
+    experience: Number(profile.experience ?? 0),
+    experience_to_next: Number(profile.experience_to_next ?? 100),
+    total_experience: Number(profile.total_experience ?? profile.experience ?? 0),
+    attribute_points: Number(profile.attribute_points ?? 0),
+    attributes: profile.attributes ?? {
+      vitality: 5,
+      strength: 5,
+      agility: 5,
+      wisdom: 5,
+      luck: 5,
+    },
+    active_quests: profile.active_quests ?? {},
+    completed_quests: profile.completed_quests ?? [],
     inventory: normalizeInventory(profile.inventory),
+    current_hp: Number(profile.current_hp ?? 1),
+    max_hp: Number(profile.max_hp ?? profile.current_hp ?? 1),
+    current_mp: Number(profile.current_mp ?? 0),
+    max_mp: Number(profile.max_mp ?? profile.current_mp ?? 0),
     stamina: Number(profile.stamina ?? 100),
     max_stamina: Number(profile.max_stamina ?? 100),
+    combat_statuses: profile.combat_statuses ?? [],
+    psychological_traits: profile.psychological_traits ?? [],
+    equipped_weapon_id: profile.equipped_weapon_id == null ? null : String(profile.equipped_weapon_id),
+    equipped_armor_id: profile.equipped_armor_id == null ? null : String(profile.equipped_armor_id),
+    equipped_item_id: profile.equipped_item_id == null ? null : String(profile.equipped_item_id),
     current_map: profile.current_map ? normalizeMap(profile.current_map) : null,
     world_maps: Object.fromEntries(
       Object.entries(profile.world_maps ?? {}).map(([key, map]) => [key, normalizeMap(map)]),
@@ -152,22 +182,44 @@ export function normalizeCombatSnapshot(snapshot: CombatSnapshot): CombatSnapsho
     thread_id: String(snapshot.thread_id),
     state: {
       ...snapshot.state,
+      environment_context: {
+        ...snapshot.state.environment_context,
+        tags: snapshot.state.environment_context?.tags ?? [],
+        hazards: snapshot.state.environment_context?.hazards ?? [],
+      },
       p1_id: String(snapshot.state.p1_id),
       p2_id: snapshot.state.p2_id === null ? null : String(snapshot.state.p2_id),
       player_inventory: normalizeInventory(snapshot.state.player_inventory),
       player_class: normalizeCharacter(snapshot.state.player_class),
+      player_race: snapshot.state.player_race
+        ? { ...snapshot.state.player_race, id: String(snapshot.state.player_race.id), exclusive_skills: normalizeSkills(snapshot.state.player_race.exclusive_skills) }
+        : null,
+      player_race_skills: normalizeSkills(snapshot.state.player_race_skills),
       player_weapon: normalizeWeapon(snapshot.state.player_weapon),
       player_armor: normalizeArmor(snapshot.state.player_armor),
       player_item: normalizeItem(snapshot.state.player_item),
       player_item_id: snapshot.state.player_item_id === null ? null : String(snapshot.state.player_item_id),
+      player_statuses: snapshot.state.player_statuses ?? [],
+      player_stats: snapshot.state.player_stats && 'max_hp' in snapshot.state.player_stats
+        ? snapshot.state.player_stats
+        : null,
       ai_inventory: 'weapons' in snapshot.state.ai_inventory
         ? normalizeInventory(snapshot.state.ai_inventory as Inventory)
         : {},
       ai_class: normalizeCharacter(snapshot.state.ai_class),
+      ai_race: snapshot.state.ai_race
+        ? { ...snapshot.state.ai_race, id: String(snapshot.state.ai_race.id), exclusive_skills: normalizeSkills(snapshot.state.ai_race.exclusive_skills) }
+        : null,
+      ai_race_skills: normalizeSkills(snapshot.state.ai_race_skills),
       ai_weapon: normalizeWeapon(snapshot.state.ai_weapon),
       ai_armor: normalizeArmor(snapshot.state.ai_armor),
       ai_item: normalizeItem(snapshot.state.ai_item),
       ai_item_id: snapshot.state.ai_item_id === null ? null : String(snapshot.state.ai_item_id),
+      ai_statuses: snapshot.state.ai_statuses ?? [],
+      ai_stats: snapshot.state.ai_stats && 'max_hp' in snapshot.state.ai_stats
+        ? snapshot.state.ai_stats
+        : null,
     },
+    last_resolution: snapshot.last_resolution ?? {},
   }
 }

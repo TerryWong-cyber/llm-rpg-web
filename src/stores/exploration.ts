@@ -126,9 +126,24 @@ async function camp(): Promise<void> {
   try {
     const response = await mapApi.camp(playerId)
     applyMapState(response)
-    useNotificationsStore().show('你完成了一次扎营休息，精力已经恢复。', 'success')
+    useNotificationsStore().show('你完成了一次扎营休息，生命、法力与精力得到部分恢复。', 'success')
   } catch (error) {
     useNotificationsStore().capture(error, '这次扎营没有成功。', true)
+  } finally {
+    busy.value = false
+  }
+}
+
+async function restAtInn(): Promise<void> {
+  const playerId = usePlayerStore().playerId.value
+  if (!playerId || !state.value?.actions.inn.available || busy.value) return
+  busy.value = true
+  try {
+    const response = await mapApi.restAtInn(playerId)
+    applyMapState(response)
+    useNotificationsStore().show('旅店的完整休整恢复了全部资源，并清除了持续异常。', 'success')
+  } catch (error) {
+    useNotificationsStore().capture(error, '当前无法使用旅店休整。', true)
   } finally {
     busy.value = false
   }
@@ -238,7 +253,11 @@ export function useExplorationStore() {
   const campAvailable = computed(() => {
     const value = state.value
     const time = currentWorldTime.value
-    if (!value || !time || !currentCell.value?.campable || value.player.stamina >= value.player.max_stamina) return false
+    const resourcesFull = Boolean(value
+      && value.player.stamina >= value.player.max_stamina
+      && value.player.current_hp >= value.player.max_hp
+      && value.player.current_mp >= value.player.max_mp)
+    if (!value || !time || !currentCell.value?.campable || resourcesFull) return false
     return value.player.last_camped_game_day !== Math.floor(time.total_game_hours / 24)
   })
   return {
@@ -251,6 +270,7 @@ export function useExplorationStore() {
     shopAvailable,
     gatherAvailable,
     campAvailable,
+    innAvailable: computed(() => Boolean(state.value?.actions.inn.available)),
     loadTemplates,
     enter,
     canMoveTo,
@@ -258,6 +278,7 @@ export function useExplorationStore() {
     moveDirection,
     gatherCurrent,
     camp,
+    restAtInn,
     eat,
     resolveEventAction,
     resetExploration,

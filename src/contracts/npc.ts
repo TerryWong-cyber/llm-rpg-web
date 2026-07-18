@@ -35,6 +35,7 @@ export interface NpcRelationship {
   hostility: number
   flags: string[]
   active_story_hooks: string[]
+  completed_story_hooks: string[]
   armed_combat_triggers: string[]
   consumed_combat_triggers: string[]
   interaction_count: number
@@ -47,6 +48,8 @@ export interface StoryHook {
   min_affinity: number
   min_trust: number
   requires_memory_tags: string[]
+  xp_reward: number
+  requirements: import('./player').QuestRequirement[]
 }
 
 export interface CombatTrigger {
@@ -75,4 +78,5 @@ export interface NpcDialogueResponse {
   relationship: NpcRelationship
   activated_story_hook: StoryHook | null
   combat_trigger: CombatTrigger | null
+  profile: import('./player').PlayerProfile
 }

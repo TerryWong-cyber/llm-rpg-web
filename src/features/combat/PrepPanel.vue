@@ -5,6 +5,14 @@
       <button class="button button--ghost" type="button" @click="combat.leaveRoom">退出房间</button>
     </header>
 
+    <div class="global-resource-notice panel">
+      <strong>资源不会在开战时自动恢复</strong>
+      <span>生命 {{ player.profile.value?.current_hp ?? 0 }}/{{ player.profile.value?.max_hp ?? 0 }}</span>
+      <span>法力 {{ player.profile.value?.current_mp ?? 0 }}/{{ player.profile.value?.max_mp ?? 0 }}</span>
+      <span>精力 {{ player.profile.value?.stamina ?? 0 }}/{{ player.profile.value?.max_stamina ?? 0 }}</span>
+      <small>更换提高生命上限的护甲不会凭空治疗；扎营可恢复部分资源。</small>
+    </div>
+
     <div class="loadout-grid">
       <fieldset class="loadout-column panel">
         <legend><span>01</span> 主武器</legend>
@@ -44,9 +52,11 @@ import { computed, ref, watch } from 'vue'
 import type { CombatSnapshot, GameMeta } from '../../contracts'
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCombatStore } from '../../stores/combat'
+import { usePlayerStore } from '../../stores/player'
 
 const props = defineProps<{ snapshot: CombatSnapshot; meta: GameMeta }>()
 const combat = useCombatStore()
+const player = usePlayerStore()
 const weaponId = ref('')
 const armorId = ref('')
 const itemId = ref('')
@@ -56,8 +66,18 @@ const ownedWeapons = computed(() => 'weapons' in (inventory.value ?? {}) ? [...n
 const ownedArmors = computed(() => 'armors' in (inventory.value ?? {}) ? [...new Set(inventory.value.armors)] : [])
 const ownedItems = computed(() => 'items' in (inventory.value ?? {}) ? Object.fromEntries(Object.entries(inventory.value.items).filter(([, count]) => count > 0)) : {})
 
-watch(ownedWeapons, (ids) => { if (!ids.includes(weaponId.value)) weaponId.value = ids[0] ?? '' }, { immediate: true })
-watch(ownedArmors, (ids) => { if (!ids.includes(armorId.value)) armorId.value = ids[0] ?? '' }, { immediate: true })
+watch(ownedWeapons, (ids) => {
+  if (!ids.includes(weaponId.value)) {
+    const equipped = player.profile.value?.equipped_weapon_id ?? ''
+    weaponId.value = ids.includes(equipped) ? equipped : ids[0] ?? ''
+  }
+}, { immediate: true })
+watch(ownedArmors, (ids) => {
+  if (!ids.includes(armorId.value)) {
+    const equipped = player.profile.value?.equipped_armor_id ?? ''
+    armorId.value = ids.includes(equipped) ? equipped : ids[0] ?? ''
+  }
+}, { immediate: true })
 
 function submit(): void {
   combat.submitPrep({ weapon_id: weaponId.value, armor_id: armorId.value, item_id: itemId.value || null })

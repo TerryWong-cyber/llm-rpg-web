@@ -5,6 +5,7 @@ import type {
   CreateCharacterRequest,
   CreateCharacterResponse,
   GameMeta,
+  ProfileUpdateResponse,
   RecipesResponse,
   TradeRequest,
   TradeResponse,
@@ -25,6 +26,29 @@ export async function createCharacter(payload: CreateCharacterRequest): Promise<
     body: payload,
   })
   return { ...response, player_id: String(response.player_id), profile: normalizeProfile(response.profile) }
+}
+
+export async function allocateAttributes(
+  playerId: string,
+  allocations: Record<string, number>,
+): Promise<ProfileUpdateResponse> {
+  const response = await apiRequest<ProfileUpdateResponse>('/api/game/character/allocate', {
+    method: 'POST',
+    body: { player_id: playerId, allocations },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
+export async function completeQuest(
+  playerId: string,
+  npcId: string,
+  hookId: string,
+): Promise<ProfileUpdateResponse> {
+  const response = await apiRequest<ProfileUpdateResponse>('/api/game/quest/complete', {
+    method: 'POST',
+    body: { player_id: playerId, npc_id: npcId, hook_id: hookId },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
 }
 
 export async function trade(

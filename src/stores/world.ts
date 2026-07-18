@@ -77,6 +77,7 @@ async function talk(message: string): Promise<boolean> {
     relationship.value = response.relationship
     combatTrigger.value = response.combat_trigger
     activatedStoryHook.value = response.activated_story_hook
+    usePlayerStore().replaceProfile(response.profile)
     const memoryResponse = await npcApi.getNpcMemories(npc.npc_id, playerId)
     memories.value = memoryResponse.memories ?? []
     return true
