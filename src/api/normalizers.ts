@@ -119,6 +119,8 @@ export function normalizeProfile(profile: PlayerProfile): PlayerProfile {
     },
     active_quests: profile.active_quests ?? {},
     completed_quests: profile.completed_quests ?? [],
+    quest_history: profile.quest_history ?? {},
+    encountered_npc_ids: profile.encountered_npc_ids ?? [],
     inventory: normalizeInventory(profile.inventory),
     current_hp: Number(profile.current_hp ?? 1),
     max_hp: Number(profile.max_hp ?? profile.current_hp ?? 1),

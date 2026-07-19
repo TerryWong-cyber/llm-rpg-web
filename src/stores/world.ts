@@ -7,6 +7,7 @@ import type {
   NpcRelationship,
   PublicNpc,
   StoryHook,
+  PlayerJournal,
 } from '../contracts'
 import { useNotificationsStore } from './notifications'
 import { usePlayerStore } from './player'
@@ -25,14 +26,22 @@ const worldFacts = ref<MemoryEntry[]>([])
 const dialogueLog = ref<DialogueLine[]>([])
 const combatTrigger = ref<CombatTrigger | null>(null)
 const activatedStoryHook = ref<StoryHook | null>(null)
+const journal = ref<PlayerJournal | null>(null)
 const busy = ref(false)
 
 async function loadWorld(): Promise<void> {
+  const playerId = usePlayerStore().playerId.value
+  if (!playerId) return
   busy.value = true
   try {
-    const [npcResponse, factResponse] = await Promise.all([npcApi.getNpcs(), npcApi.getWorldFacts()])
+    const [npcResponse, factResponse, journalResponse] = await Promise.all([
+      npcApi.getNpcs({ player_id: playerId }),
+      npcApi.getWorldFacts(),
+      npcApi.getPlayerJournal(playerId),
+    ])
     npcs.value = npcResponse.npcs ?? []
     worldFacts.value = factResponse.facts ?? []
+    journal.value = journalResponse
   } catch (error) {
     useNotificationsStore().capture(error, '世界人物信息加载失败。')
   } finally {
@@ -45,16 +54,22 @@ async function selectNpc(npcId: string, keepDialogue = false): Promise<boolean> 
   if (!playerId) return false
   busy.value = true
   try {
-    const [npcResponse, memoryResponse] = await Promise.all([
+    const [npcResponse, memoryResponse, conversationResponse] = await Promise.all([
       npcApi.getNpc(npcId, playerId),
       npcApi.getNpcMemories(npcId, playerId),
+      npcApi.getNpcConversations(npcId, playerId),
     ])
     selectedNpc.value = npcResponse.npc
     relationship.value = npcResponse.relationship
     memories.value = memoryResponse.memories ?? []
     combatTrigger.value = null
     activatedStoryHook.value = null
-    if (!keepDialogue) dialogueLog.value = []
+    if (!keepDialogue) {
+      dialogueLog.value = (conversationResponse.conversations ?? []).flatMap((turn) => [
+        { role: 'player' as const, text: turn.player_message },
+        { role: 'npc' as const, text: turn.npc_reply, tone: turn.tone },
+      ])
+    }
     return true
   } catch (error) {
     useNotificationsStore().capture(error, '无法读取这位人物的信息。', true)
@@ -80,6 +95,8 @@ async function talk(message: string): Promise<boolean> {
     usePlayerStore().replaceProfile(response.profile)
     const memoryResponse = await npcApi.getNpcMemories(npc.npc_id, playerId)
     memories.value = memoryResponse.memories ?? []
+    journal.value = await npcApi.getPlayerJournal(playerId)
+    npcs.value = journal.value.contacts.map((contact) => contact.npc)
     return true
   } catch (error) {
     useNotificationsStore().capture(error, '对话没有得到回应。', true)
@@ -116,6 +133,7 @@ function resetWorld(): void {
   dialogueLog.value = []
   combatTrigger.value = null
   activatedStoryHook.value = null
+  journal.value = null
 }
 
 export function useWorldStore() {
@@ -128,6 +146,7 @@ export function useWorldStore() {
     dialogueLog: readonly(dialogueLog),
     combatTrigger: readonly(combatTrigger),
     activatedStoryHook: readonly(activatedStoryHook),
+    journal: readonly(journal),
     busy: computed(() => busy.value),
     loadWorld,
     selectNpc,

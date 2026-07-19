@@ -20,10 +20,15 @@ const busy = ref(false)
 const lastGatherMessage = ref('')
 const clockTick = ref(Date.now())
 let clockTimer: number | null = null
+let resourceSyncBusy = false
+let lastResourceSyncGameHour: number | null = null
 
 function startClock(): void {
   if (clockTimer !== null || typeof window === 'undefined') return
-  clockTimer = window.setInterval(() => { clockTick.value = Date.now() }, 1000)
+  clockTimer = window.setInterval(() => {
+    clockTick.value = Date.now()
+    void syncResourcesIfDue()
+  }, 1000)
 }
 
 async function loadTemplates(): Promise<void> {
@@ -38,11 +43,44 @@ async function loadTemplates(): Promise<void> {
 
 function applyMapState(next: MapStateResponse): void {
   state.value = next
+  lastResourceSyncGameHour = next.world_time.total_game_hours
   usePlayerStore().syncExploration(next.map, next.inventory_materials, next.player)
   startClock()
   if (next.transition) {
     const destination = next.world.regions[next.transition.to_region_id]?.name ?? next.transition.to_region_id
     useNotificationsStore().show(`你已越过边界，进入「${destination}」。`, 'success')
+  }
+}
+
+async function syncResourcesIfDue(): Promise<void> {
+  const value = state.value
+  const playerId = usePlayerStore().playerId.value
+  const currentTime = advanceWorldTime(value?.world_time)
+  if (!value || !playerId || !currentTime || busy.value || resourceSyncBusy) return
+  if (lastResourceSyncGameHour === null) {
+    lastResourceSyncGameHour = value.world_time.total_game_hours
+    return
+  }
+  if (currentTime.total_game_hours <= lastResourceSyncGameHour) return
+  lastResourceSyncGameHour = currentTime.total_game_hours
+  if (value.player.stamina >= value.player.max_stamina && !value.player.sleep) return
+
+  resourceSyncBusy = true
+  try {
+    const response = await mapApi.getPlayerResources(playerId)
+    if (!state.value) return
+    state.value = {
+      ...state.value,
+      player: response.player,
+      world_time: response.world_time,
+      actions: response.actions,
+    }
+    lastResourceSyncGameHour = response.world_time.total_game_hours
+    usePlayerStore().syncExploration(state.value.map, state.value.inventory_materials, response.player)
+  } catch {
+    // Resource polling is opportunistic; normal actions surface connection errors.
+  } finally {
+    resourceSyncBusy = false
   }
 }
 
@@ -68,7 +106,7 @@ async function enter(templateId?: string | null, refresh = false): Promise<Encou
 }
 
 function canMoveTo(cell: MapCell): boolean {
-  if (!state.value || busy.value || !cell.passable) return false
+  if (!state.value || busy.value || sleeping.value || !cell.passable) return false
   const current = state.value.map_grid.find((item) => item.cell_id === state.value?.map.current_cell_id)
   if (!current) return false
   return Math.abs(current.x - cell.x) + Math.abs(current.y - cell.y) === 1
@@ -126,7 +164,7 @@ async function camp(): Promise<void> {
   try {
     const response = await mapApi.camp(playerId)
     applyMapState(response)
-    useNotificationsStore().show('你完成了一次扎营休息，生命、法力与精力得到部分恢复。', 'success')
+    useNotificationsStore().show('你已经入睡；60 秒后完成六小时休息。', 'success')
   } catch (error) {
     useNotificationsStore().capture(error, '这次扎营没有成功。', true)
   } finally {
@@ -141,7 +179,7 @@ async function restAtInn(): Promise<void> {
   try {
     const response = await mapApi.restAtInn(playerId)
     applyMapState(response)
-    useNotificationsStore().show('旅店的完整休整恢复了全部资源，并清除了持续异常。', 'success')
+    useNotificationsStore().show('你已经在旅店入睡；完整休息需要 60 秒。', 'success')
   } catch (error) {
     useNotificationsStore().capture(error, '当前无法使用旅店休整。', true)
   } finally {
@@ -159,6 +197,21 @@ async function eat(itemId: string): Promise<void> {
     useNotificationsStore().show('你吃下补给，恢复了一些精力。', 'success')
   } catch (error) {
     useNotificationsStore().capture(error, '无法使用这份补给。', true)
+  } finally {
+    busy.value = false
+  }
+}
+
+async function wake(): Promise<void> {
+  const playerId = usePlayerStore().playerId.value
+  if (!playerId || !state.value || busy.value) return
+  busy.value = true
+  try {
+    const response = await mapApi.wake(playerId)
+    applyMapState(response)
+    useNotificationsStore().show('睡眠已中断，资源按完成的整小时结算。', 'info')
+  } catch (error) {
+    useNotificationsStore().capture(error, '无法结束睡眠。', true)
   } finally {
     busy.value = false
   }
@@ -221,12 +274,13 @@ function resetExploration(): void {
   state.value = null
   templates.value = null
   lastGatherMessage.value = ''
+  lastResourceSyncGameHour = null
 }
 
 function gatherAvailableNow(): boolean {
   const value = state.value
   const time = advanceWorldTime(value?.world_time)
-  if (!value || !time) return false
+  if (!value || !time || sleeping.value) return false
   const cell = value.map_grid.find((item) => item.cell_id === value.map.current_cell_id)
   const terrain = cell ? value.terrains_meta[cell.terrain_id] : null
   if (!cell || !terrain || !cell.gatherable || cell.gathered) return false
@@ -270,6 +324,8 @@ export function useExplorationStore() {
     currentWorldTime,
     shopAvailable,
     gatherAvailable,
+    sleeping,
+    sleepRemainingSeconds,
     campAvailable,
     innAvailable: computed(() => Boolean(state.value?.actions.inn.available)),
     loadTemplates,
@@ -280,8 +336,18 @@ export function useExplorationStore() {
     gatherCurrent,
     camp,
     restAtInn,
+    wake,
     eat,
     resolveEventAction,
     resetExploration,
   }
 }
+
+const sleepRemainingSeconds = computed(() => {
+  void clockTick.value
+  const sleep = state.value?.player.sleep
+  if (!sleep) return 0
+  const elapsed = Math.max(0, Date.now() - Date.parse(sleep.started_at)) / 1000
+  return Math.max(0, Math.ceil(sleep.duration_seconds - elapsed))
+})
+const sleeping = computed(() => sleepRemainingSeconds.value > 0)

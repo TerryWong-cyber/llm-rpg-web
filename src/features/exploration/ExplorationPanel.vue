@@ -1,65 +1,5 @@
 <template>
   <section class="feature-stack exploration-feature">
-    <article v-if="exploration.state.value?.encounter" class="encounter-banner">
-      <span class="encounter-banner__sigil">✦</span>
-      <div><p class="eyebrow">A FATEFUL ENCOUNTER</p><h3>你察觉到附近有一位值得交谈的人</h3><p>聚落会显著提高相遇概率，但最终结果仍由服务端规则决定。</p></div>
-      <button class="button button--primary" type="button" @click="openEncounter(exploration.state.value.encounter.npc_id)">查看遭遇</button>
-    </article>
-
-    <article v-if="exploration.state.value?.event" class="world-event" :class="`world-event--${exploration.state.value.event.kind}`">
-      <span>{{ exploration.state.value.event.emoji }}</span>
-      <div>
-        <p class="eyebrow">WORLD EVENT · {{ eventStateLabel(exploration.state.value.event.state) }}</p>
-        <h3>{{ exploration.state.value.event.title }}</h3>
-        <p>{{ exploration.state.value.event.description }}</p>
-        <div v-if="eventParticipant" class="event-participant">
-          <ItemIcon class="event-participant__portrait" :image-url="eventParticipant.image_url ?? ''" :fallback="participantFallback" />
-          <div class="event-participant__body">
-            <small>{{ eventParticipant.type === 'monster' ? `危险等级 ${eventParticipant.combat.threat}` : eventParticipant.race }}</small>
-            <strong>{{ eventParticipant.name }} · {{ eventParticipant.title }}</strong>
-            <p>{{ eventParticipant.type === 'monster' ? eventParticipant.description : eventParticipant.public_backstory }}</p>
-            <div class="event-participant__facts">
-              <template v-if="eventParticipant.type === 'monster'">
-                <span>生命 {{ eventParticipant.stats.hp }}</span><span>武器 {{ eventParticipant.equipment.weapon_name }}</span><span>护甲 {{ eventParticipant.equipment.armor_name }}</span>
-                <span v-for="drop in eventParticipant.drops" :key="`${drop.item_type}:${drop.item_id}`">掉落 {{ dropName(drop.item_type, drop.item_id) }} · {{ Math.round(drop.chance * 100) }}%</span>
-              </template>
-              <template v-else>
-                <span v-for="hook in eventParticipant.story_hooks" :key="hook.hook_id">可触发任务 · {{ hook.title }}</span>
-                <span v-if="eventParticipant.has_combat_profile">战斗威胁 {{ eventParticipant.combat_threat }}</span>
-              </template>
-            </div>
-          </div>
-        </div>
-        <p v-if="exploration.state.value.event.blocks_movement" class="event-forced-warning">此事件封锁了道路，必须先处理才能离开当前地图格。</p>
-        <div v-if="exploration.state.value.event.actions.length" class="world-event__actions">
-          <template
-            v-for="action in exploration.state.value.event.actions"
-            :key="action.action_id"
-          >
-            <div v-if="action.kind === 'use_item'" class="world-event__item-action">
-              <select v-model="eventItemSelections[action.action_id]" :disabled="exploration.busy.value || !action.eligible_items.length">
-                <option value="">{{ action.eligible_items.length ? '选择可用物品' : '行囊中没有匹配物品' }}</option>
-                <option v-for="item in action.eligible_items" :key="item.item_id" :value="item.item_id">
-                  {{ item.name }} × {{ item.quantity }}
-                </option>
-              </select>
-              <button class="button button--primary" type="button" :disabled="exploration.busy.value || !eventItemSelections[action.action_id]" @click="resolveEventAction(action.action_id, eventItemSelections[action.action_id])">
-                {{ action.forced ? '必须 · ' : '' }}{{ action.label }}
-              </button>
-            </div>
-            <button
-              v-else
-              class="button"
-              :class="action.style === 'danger' ? 'button--danger-ghost' : action.style === 'primary' ? 'button--primary' : 'button--ghost'"
-              type="button"
-              :disabled="exploration.busy.value"
-              @click="resolveEventAction(action.action_id)"
-            >{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
-          </template>
-        </div>
-      </div>
-    </article>
-
     <div v-if="exploration.state.value" class="atlas panel">
       <header class="atlas__header">
         <div>
@@ -76,7 +16,58 @@
         </div>
       </header>
 
+      <div v-if="exploration.sleeping.value" class="sleeping-banner">
+        <span>☾</span>
+        <div><strong>睡眠中</strong><small>还需 {{ exploration.sleepRemainingSeconds.value }} 秒 · 完整休息相当于游戏内 6 小时</small></div>
+        <button class="button button--danger-ghost" type="button" :disabled="exploration.busy.value" @click="exploration.wake">中断睡眠</button>
+      </div>
+
       <div class="atlas__body">
+        <aside class="atlas__event-panel">
+          <article v-if="exploration.state.value.encounter" class="encounter-banner">
+            <span class="encounter-banner__sigil">✦</span>
+            <div><p class="eyebrow">旅途相遇</p><h3>附近有一位值得交谈的人</h3></div>
+            <button class="button button--primary" type="button" @click="openEncounter(exploration.state.value.encounter.npc_id)">查看遭遇</button>
+          </article>
+
+          <article v-if="exploration.state.value.event" class="world-event" :class="`world-event--${exploration.state.value.event.kind}`">
+            <header><span>{{ exploration.state.value.event.emoji }}</span><div><p class="eyebrow">WORLD EVENT · {{ eventStateLabel(exploration.state.value.event.state) }}</p><h3>{{ exploration.state.value.event.title }}</h3></div></header>
+            <p>{{ exploration.state.value.event.description }}</p>
+            <div v-if="eventParticipant" class="event-participant">
+              <ItemIcon class="event-participant__portrait" :image-url="eventParticipant.image_url ?? ''" :fallback="participantFallback" />
+              <div class="event-participant__body">
+                <small>{{ eventParticipant.type === 'monster' ? `危险等级 ${eventParticipant.combat.threat}` : eventParticipant.race }}</small>
+                <strong>{{ eventParticipant.name }} · {{ eventParticipant.title }}</strong>
+                <p>{{ eventParticipant.type === 'monster' ? eventParticipant.description : eventParticipant.public_backstory }}</p>
+                <div class="event-participant__facts">
+                  <template v-if="eventParticipant.type === 'monster'">
+                    <span>生命 {{ eventParticipant.stats.hp }}</span><span>武器 {{ eventParticipant.equipment.weapon_name }}</span><span>护甲 {{ eventParticipant.equipment.armor_name }}</span>
+                    <span v-for="drop in eventParticipant.drops" :key="`${drop.item_type}:${drop.item_id}`">掉落 {{ dropName(drop.item_type, drop.item_id) }} · {{ Math.round(drop.chance * 100) }}%</span>
+                  </template>
+                  <template v-else>
+                    <span v-for="hook in eventParticipant.story_hooks" :key="hook.hook_id">任务 · {{ hook.title }}</span>
+                    <span v-if="eventParticipant.has_combat_profile">威胁 {{ eventParticipant.combat_threat }}</span>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <p v-if="exploration.state.value.event.blocks_movement" class="event-forced-warning">道路已被封锁，必须先处理此事件。</p>
+            <div v-if="exploration.state.value.event.actions.length" class="world-event__actions">
+              <template v-for="action in exploration.state.value.event.actions" :key="action.action_id">
+                <div v-if="action.kind === 'use_item' && action.eligible_items.length" class="world-event__item-action">
+                  <select v-model="eventItemSelections[action.action_id]" :disabled="exploration.busy.value">
+                    <option value="">选择可用物品</option>
+                    <option v-for="item in action.eligible_items" :key="item.item_id" :value="item.item_id">{{ item.name }} × {{ item.quantity }}</option>
+                  </select>
+                  <button class="button button--primary" type="button" :disabled="exploration.busy.value || !eventItemSelections[action.action_id]" @click="resolveEventAction(action.action_id, eventItemSelections[action.action_id])">{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
+                </div>
+                <button v-else-if="action.kind !== 'use_item'" class="button" :class="action.style === 'danger' ? 'button--danger-ghost' : action.style === 'primary' ? 'button--primary' : 'button--ghost'" type="button" :disabled="exploration.busy.value" @click="resolveEventAction(action.action_id)">{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
+              </template>
+            </div>
+          </article>
+          <div v-else-if="!exploration.state.value.encounter" class="atlas-side-empty"><span>✦</span><strong>旅途平静</strong><small>当前地图格没有待处理事件</small></div>
+        </aside>
+
         <div ref="mapScroll" class="map-scroll" tabindex="0" aria-label="可滚动的探索地图，支持方向键与 WASD">
           <div class="map-grid" :style="gridStyle">
             <button
@@ -106,53 +97,40 @@
           </div>
         </div>
 
-      </div>
-
-      <footer class="atlas__footer">
-        <div class="current-place">
-          <ItemIcon class="current-place__icon item-icon--portrait" :image-url="playerAvatarUrl" :fallback="playerInitial" />
-          <div>
-            <small>你所在的位置</small>
-            <strong>{{ terrain(exploration.currentCell.value?.terrain_id)?.name ?? '未知地带' }}</strong>
-            <span>{{ terrainDescription }}</span>
+        <aside class="atlas__action-panel">
+          <div class="current-place">
+            <ItemIcon class="current-place__icon item-icon--portrait" :image-url="playerAvatarUrl" :fallback="playerInitial" />
+            <div><small>你所在的位置</small><strong>{{ terrain(exploration.currentCell.value?.terrain_id)?.name ?? '未知地带' }}</strong><span>{{ terrainDescription }}</span></div>
           </div>
-        </div>
-        <div class="field-actions">
-          <button class="button button--primary" type="button" :disabled="!canGather" :title="gatherReason" @click="gather">
-            {{ exploration.busy.value ? '正在行动…' : `采集 · ${gatherCost} 精力` }}
-          </button>
-          <button class="button button--ghost" type="button" :disabled="!canCamp" :title="campReason" @click="exploration.camp">⛺ 扎营休息</button>
-          <button v-if="exploration.currentCell.value?.interaction_ids.includes('inn')" class="button button--gold" type="button" :disabled="!exploration.innAvailable.value || exploration.busy.value" :title="innReason" @click="exploration.restAtInn">♨ 旅店休整</button>
-          <button class="button button--gold" type="button" :disabled="!exploration.shopAvailable.value" :title="shopReason" @click="emit('shop')">进入商店</button>
-        </div>
-      </footer>
 
-      <div class="terrain-ledger">
-        <span v-for="tag in exploration.currentCell.value?.tags ?? []" :key="tag"># {{ tag }}</span>
-        <div v-if="availableResources.length" class="resource-preview">
-          <small>当前时段可发现</small>
-          <span v-for="resource in availableResources" :key="resource.id" :class="`resource-preview--${resource.rarity}`" :title="resource.desc">
-            <img v-if="resource.imageUrl" :src="resource.imageUrl" alt="" />
-            <i v-else>{{ resource.emoji }}</i>
-            {{ resource.name }}
-            <b>{{ rarityLabel(resource.rarity) }}</b>
-          </span>
-        </div>
-        <span v-else>当前没有可采集资源</span>
+          <section class="map-side-section">
+            <p class="eyebrow">AVAILABLE ACTIONS</p>
+            <div v-if="hasFieldActions" class="field-actions">
+              <button v-if="exploration.gatherAvailable.value" class="button button--primary" type="button" :disabled="exploration.busy.value" @click="gather">{{ exploration.busy.value ? '正在行动…' : `采集 · ${gatherCost} 精力` }}</button>
+              <button v-if="exploration.campAvailable.value" class="button button--ghost" type="button" :disabled="exploration.busy.value" @click="exploration.camp">⛺ 扎营休息</button>
+              <button v-if="exploration.innAvailable.value" class="button button--gold" type="button" :disabled="exploration.busy.value" @click="exploration.restAtInn">♨ 旅店休整</button>
+              <button v-if="exploration.shopAvailable.value" class="button button--gold" type="button" @click="emit('shop')">进入商店</button>
+            </div>
+            <small v-else class="map-side-muted">当前没有可执行的场景操作</small>
+          </section>
+
+          <section class="map-side-section">
+            <p class="eyebrow">DISCOVERABLE</p>
+            <div v-if="availableResources.length" class="resource-preview">
+              <span v-for="resource in availableResources" :key="resource.id" :class="`resource-preview--${resource.rarity}`" :title="resource.desc">
+                <img v-if="resource.imageUrl" :src="resource.imageUrl" alt="" /><i v-else>{{ resource.emoji }}</i>{{ resource.name }}<b>{{ rarityLabel(resource.rarity) }}</b>
+              </span>
+            </div>
+            <small v-else class="map-side-muted">当前时段没有可发现物品</small>
+          </section>
+
+          <div v-if="exploration.currentCell.value?.tags.length" class="terrain-tags"><span v-for="tag in exploration.currentCell.value.tags" :key="tag"># {{ tag }}</span></div>
+        </aside>
       </div>
     </div>
 
     <div v-else-if="exploration.busy.value" class="empty-state"><span class="spinner" /><h3>世界正在展开</h3><p>地块数量、资源与通路正在根据固定种子生成。</p></div>
     <div v-else class="empty-state"><span>⌖</span><h3>尚未踏上世界地图</h3><p>出生地域由种族与国度决定。</p><button class="button button--primary" type="button" @click="enterSelected(false)">前往出生城镇</button></div>
-
-    <div v-if="materials.length" class="materials-strip">
-      <small>采集袋</small>
-      <span v-for="material in materials" :key="material.id" :class="`material-chip--${material.rarity}`" :title="`${categoryLabel(material.category)} · ${rarityLabel(material.rarity)}`">
-        <img v-if="material.imageUrl" :src="material.imageUrl" alt="" />
-        <i v-else>{{ material.emoji }}</i>
-        {{ material.name }} <b>×{{ material.count }}</b>
-      </span>
-    </div>
 
     <div v-if="showHelp" class="modal-backdrop operation-help-backdrop" @click.self="showHelp = false">
       <section class="modal operation-help" role="dialog" aria-modal="true" aria-labelledby="operation-help-title">
@@ -198,9 +176,14 @@ watch(
   { flush: 'post' },
 )
 
-const gridStyle = computed(() => ({
-  gridTemplateColumns: `repeat(${exploration.state.value?.map.width ?? 1}, minmax(2.43rem, 1fr))`,
-}))
+const gridStyle = computed(() => {
+  const width = exploration.state.value?.map.width ?? 1
+  const height = exploration.state.value?.map.height ?? 1
+  return {
+    '--map-tile-size': `min(calc((100cqw - .5rem) / ${width}), calc((100cqh - .5rem) / ${height}))`,
+    gridTemplateColumns: `repeat(${width}, var(--map-tile-size))`,
+  }
+})
 const currentRegion = computed(() => {
   const id = exploration.state.value?.map.region_id
   return id ? (exploration.state.value?.world.regions[id] ?? exploration.templates.value?.regions[id]) : null
@@ -232,12 +215,12 @@ const timeLabel = computed(() => {
   const time = currentTime.value
   return time ? `${time.month} 月 ${time.day} 日 · ${String(time.hour).padStart(2, '0')}:00` : '时间同步中'
 })
-const canGather = computed(() => Boolean(exploration.gatherAvailable.value && !exploration.busy.value))
-const canCamp = computed(() => Boolean(exploration.campAvailable.value && !exploration.busy.value))
-const gatherReason = computed(() => exploration.state.value?.actions.gather.reason ?? '')
-const campReason = computed(() => exploration.state.value?.actions.camp.reason ?? '')
-const innReason = computed(() => exploration.state.value?.actions.inn.reason ?? '')
-const shopReason = computed(() => exploration.shopAvailable.value ? '' : (exploration.state.value?.actions.shop.reason || '商店当前未营业'))
+const hasFieldActions = computed(() => Boolean(
+  exploration.gatherAvailable.value
+  || exploration.campAvailable.value
+  || exploration.innAvailable.value
+  || exploration.shopAvailable.value,
+))
 const gatherCost = computed(() => exploration.state.value?.actions.gather.cost ?? 0)
 const regionName = computed(() => currentRegion.value?.name ?? exploration.state.value?.map.region_id ?? 'UNCHARTED REGION')
 const terrainDescription = computed(() => {
@@ -251,19 +234,6 @@ const eventParticipant = computed(() => exploration.state.value?.event?.particip
 const participantFallback = computed(() => {
   const participant = eventParticipant.value
   return participant?.type === 'monster' ? participant.emoji : participant?.name.slice(0, 1) ?? '？'
-})
-const materials = computed(() => {
-  const state = exploration.state.value
-  if (!state) return []
-  return Object.entries(state.inventory_materials).filter(([, count]) => count > 0).map(([id, count]) => ({
-    id,
-    count,
-    name: state.resources_meta[id]?.name ?? id,
-    emoji: state.resources_meta[id]?.emoji ?? '✦',
-    imageUrl: state.resources_meta[id]?.image_url,
-    category: state.resources_meta[id]?.category,
-    rarity: state.resources_meta[id]?.rarity ?? 'common',
-  }))
 })
 const helpTips = [
   { icon: '⌨', title: '移动', description: '聚焦地图后使用方向键或 WASD；也可以直接点击相邻且可通行的地图格。' },
@@ -299,7 +269,6 @@ const availableResources = computed(() => {
 
 function terrain(id?: string) { return id ? exploration.state.value?.terrains_meta[id] ?? null : null }
 function rarityLabel(rarity?: string): string { return ({ common: '常见', uncommon: '少见', rare: '稀有' } as Record<string, string>)[rarity ?? 'common'] ?? '常见' }
-function categoryLabel(category?: string): string { return ({ wood: '木材', plant: '植物', mineral: '矿物', creature: '生物素材', aquatic: '水产', arcane: '灵性素材', regional: '地域特产', relic: '遗物' } as Record<string, string>)[category ?? ''] ?? '素材' }
 function dropName(type: 'item' | 'material', id: string): string {
   return type === 'material'
     ? exploration.state.value?.resources_meta[id]?.name ?? id

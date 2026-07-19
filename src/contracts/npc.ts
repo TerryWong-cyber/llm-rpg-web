@@ -80,3 +80,27 @@ export interface NpcDialogueResponse {
   combat_trigger: CombatTrigger | null
   profile: import('./player').PlayerProfile
 }
+
+export interface ConversationTurn {
+  turn_id: string
+  npc_id: string
+  player_id: string
+  player_message: string
+  npc_reply: string
+  tone: string
+  created_at: string
+}
+
+export interface JournalContact {
+  npc: PublicNpc
+  relationship: NpcRelationship
+  memories: MemoryEntry[]
+  conversations: ConversationTurn[]
+}
+
+export interface PlayerJournal {
+  events: import('./exploration').WorldEventLogEntry[]
+  active_quests: import('./player').QuestProgress[]
+  completed_quests: import('./player').QuestProgress[]
+  contacts: JournalContact[]
+}

@@ -234,6 +234,7 @@ function syncExploration(
     max_stamina: explorationPlayer?.max_stamina ?? profile.value.max_stamina,
     combat_statuses: explorationPlayer?.combat_statuses ?? profile.value.combat_statuses,
     last_camped_game_day: explorationPlayer?.last_camped_game_day ?? profile.value.last_camped_game_day,
+    sleep: explorationPlayer?.sleep ?? profile.value.sleep,
     ...(explorationPlayer?.progression ?? {}),
     active_quests: explorationPlayer?.active_quests ?? profile.value.active_quests,
     completed_quests: explorationPlayer?.completed_quests ?? profile.value.completed_quests,

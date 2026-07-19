@@ -14,6 +14,7 @@ export interface PlayerProfile {
   attributes: CharacterAttributes
   active_quests: Record<string, QuestProgress>
   completed_quests: string[]
+  quest_history?: Record<string, QuestProgress>
   gold: number
   inventory: Inventory
   current_hp: number
@@ -31,6 +32,20 @@ export interface PlayerProfile {
   current_map: MapInstance | null
   world_maps?: Record<string, MapInstance>
   last_camped_game_day?: number | null
+  last_stamina_recovery_game_hour?: number | null
+  sleep?: SleepState | null
+  encountered_npc_ids?: string[]
+}
+
+export interface SleepState {
+  started_at: string
+  started_game_hour: number
+  duration_seconds: number
+  duration_game_hours: number
+  start_hp: number
+  start_mp: number
+  start_stamina: number
+  location_kind: 'camp' | 'inn'
 }
 
 export interface CharacterAttributes {
@@ -49,6 +64,8 @@ export interface QuestRequirement {
   quantity?: number
   consume?: boolean
   region_id?: string | null
+  current?: number | string | null
+  completed?: boolean
 }
 
 export interface QuestProgress {
@@ -58,6 +75,11 @@ export interface QuestProgress {
   summary: string
   xp_reward: number
   requirements: QuestRequirement[]
+  related_npc_ids?: string[]
+  related_npcs?: import('./npc').PublicNpc[]
+  status?: 'active' | 'completed'
+  started_game_hour?: number | null
+  completed_game_hour?: number | null
 }
 
 export interface ProgressionView {

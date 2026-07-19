@@ -233,6 +233,7 @@ export interface ExplorationPlayerState {
   combat_statuses: CombatStatus[]
   inventory_items: Record<string, number>
   last_camped_game_day: number | null
+  sleep: import('./player').SleepState | null
   progression: ProgressionView
   active_quests: Record<string, QuestProgress>
   completed_quests: string[]
@@ -252,6 +253,12 @@ export interface MapStateResponse {
   event: WorldEventResult | null
   event_log: WorldEventLogEntry[]
   transition: MapTransition | null
+}
+
+export interface ResourceStateResponse {
+  player: ExplorationPlayerState
+  world_time: WorldTimeSnapshot
+  actions: MapStateResponse['actions']
 }
 
 export interface MapTemplatesResponse {

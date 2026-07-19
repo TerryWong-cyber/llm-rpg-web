@@ -4,12 +4,24 @@ import type {
   NpcDialogueResponse,
   NpcRelationship,
   PublicNpc,
+  ConversationTurn,
+  PlayerJournal,
 } from '../contracts'
 import { apiRequest } from './client'
 import { normalizeCombatSnapshot, normalizeProfile } from './normalizers'
 
-export function getNpcs(query: { terrain_id?: string; cell_id?: number } = {}): Promise<{ npcs: PublicNpc[] }> {
+export function getNpcs(query: { terrain_id?: string; cell_id?: number; player_id?: string } = {}): Promise<{ npcs: PublicNpc[] }> {
   return apiRequest('/api/world/npcs', { query })
+}
+
+export function getNpcConversations(npcId: string, playerId: string): Promise<{ npc_id: string; conversations: ConversationTurn[] }> {
+  return apiRequest(`/api/world/npcs/${encodeURIComponent(npcId)}/conversations`, {
+    query: { player_id: playerId },
+  })
+}
+
+export function getPlayerJournal(playerId: string): Promise<PlayerJournal> {
+  return apiRequest(`/api/world/players/${encodeURIComponent(playerId)}/journal`)
 }
 
 export function getNpc(npcId: string, playerId: string): Promise<{ npc: PublicNpc; relationship: NpcRelationship }> {

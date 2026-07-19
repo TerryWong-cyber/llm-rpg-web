@@ -142,22 +142,19 @@ function rounded(value?: number): number {
 }
 
 function canUseSkill(cost: number): boolean {
-  if (me.value?.weapon?.type === 'phys') return (me.value?.stamina ?? 0) >= cost
   return (me.value?.mp ?? 0) >= cost
 }
 
 function skillCostLabel(cost: number): string {
-  return me.value?.weapon?.type === 'phys' ? `消耗 ${cost} 精力` : `消耗 ${cost} 法力`
+  return `消耗 ${cost} 魔力`
 }
 
 function canUseRaceSkill(skill: SkillDefinition): boolean {
-  return skill.resource === 'mp'
-    ? (me.value?.mp ?? 0) >= skill.cost
-    : (me.value?.stamina ?? 0) >= skill.cost
+  return (me.value?.mp ?? 0) >= skill.cost
 }
 
 function raceSkillCost(skill: SkillDefinition): string {
-  return skill.resource === 'mp' ? `${skill.cost} 法力` : `${skill.cost} 精力`
+  return `${skill.cost} 魔力`
 }
 
 function damageSummary(damage: DamageBreakdown): string {

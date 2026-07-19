@@ -60,22 +60,12 @@
       </div>
     </article>
 
-    <article class="panel quest-ledger">
-      <header><div><p class="eyebrow">QUEST EXPERIENCE</p><h3>任务与经验</h3></div><b>{{ activeQuests.length }} 项进行中</b></header>
-      <div v-if="activeQuests.length" class="quest-list">
-        <section v-for="quest in activeQuests" :key="quest.hook_id">
-          <div><strong>{{ quest.title }}</strong><p>{{ quest.summary }}</p><small v-for="requirement in quest.requirements" :key="requirement.description">{{ requirementMet(requirement) ? '✓' : '○' }} {{ requirement.description }}</small></div>
-          <span><b>+{{ quest.xp_reward }} XP</b><button class="button button--gold" type="button" :disabled="!questReady(quest) || player.busy.value" @click="player.completeQuest(quest.npc_id, quest.hook_id)">提交任务</button></span>
-        </section>
-      </div>
-      <div v-else class="empty-state empty-state--compact"><span>✦</span><h3>尚未接取任务</h3><p>在世界事件或与 NPC 的交流中接受委托后，进度会记录在这里。</p></div>
-    </article>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
-import type { CharacterAttributes, QuestProgress, QuestRequirement } from '../../contracts'
+import type { CharacterAttributes } from '../../contracts'
 import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCatalogStore } from '../../stores/catalog'
 import { usePlayerStore } from '../../stores/player'
@@ -108,7 +98,6 @@ const attributes: Array<{ id: AttributeId; label: string; effect: string }> = [
 const pendingTotal = computed(() => Object.values(pending).reduce((sum, value) => sum + value, 0))
 const remainingPoints = computed(() => Math.max(0, (profile.value?.attribute_points ?? 0) - pendingTotal.value))
 const xpPercent = computed(() => Math.min(100, (profile.value?.experience ?? 0) / Math.max(1, profile.value?.experience_to_next ?? 1) * 100))
-const activeQuests = computed(() => Object.values(profile.value?.active_quests ?? {}))
 
 function change(id: AttributeId, delta: number): void {
   if (delta > 0 && remainingPoints.value <= 0) return
@@ -121,18 +110,6 @@ async function commitAllocation(): Promise<void> {
   if (await player.allocateAttributes(allocations)) {
     for (const key of Object.keys(pending) as AttributeId[]) pending[key] = 0
   }
-}
-
-function requirementMet(requirement: QuestRequirement): boolean {
-  const value = profile.value
-  if (!value) return false
-  if (requirement.kind === 'region') return value.current_map?.region_id === requirement.region_id
-  const inventory = requirement.item_type === 'material' ? value.inventory.materials : value.inventory.items
-  return (inventory[requirement.item_id ?? ''] ?? 0) >= (requirement.quantity ?? 1)
-}
-
-function questReady(quest: QuestProgress): boolean {
-  return quest.requirements.every(requirementMet)
 }
 
 function openInventory(): void { emit('inventory') }

@@ -8,6 +8,7 @@ import type {
   GatherResponse,
   MapStateResponse,
   MapTemplatesResponse,
+  ResourceStateResponse,
   RestResponse,
 } from '../contracts'
 import { apiRequest } from './client'
@@ -15,6 +16,13 @@ import { normalizeCombatSnapshot, normalizeMapState } from './normalizers'
 
 export function getMapTemplates(): Promise<MapTemplatesResponse> {
   return apiRequest('/api/map/templates')
+}
+
+export function getPlayerResources(playerId: string): Promise<ResourceStateResponse> {
+  return apiRequest('/api/map/resources', {
+    cache: 'no-store',
+    query: { player_id: playerId, _refresh: Date.now() },
+  })
 }
 
 export async function enterMap(payload: EnterMapRequest): Promise<MapStateResponse> {
@@ -49,6 +57,12 @@ export async function restAtInn(playerId: string): Promise<RestResponse> {
   return normalizeMapState(await apiRequest('/api/map/inn', {
     method: 'POST',
     body: { player_id: playerId },
+  })) as RestResponse
+}
+
+export async function wake(playerId: string): Promise<RestResponse> {
+  return normalizeMapState(await apiRequest('/api/map/wake', {
+    method: 'POST', body: { player_id: playerId },
   })) as RestResponse
 }
 

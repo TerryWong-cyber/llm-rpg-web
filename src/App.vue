@@ -1,5 +1,5 @@
 <template>
-  <div class="app-shell" :class="`app-shell--${timeMoment.theme}`">
+  <div class="app-shell" :class="[`app-shell--${timeMoment.theme}`, { 'app-shell--workspace-open': openWindows.length > 0 }]">
     <div class="ambient ambient--one" /><div class="ambient ambient--two" />
     <header class="app-header">
       <a class="brand" href="#" aria-label="返回世界地图" @click.prevent="openWindows = []">
@@ -103,7 +103,9 @@ const playerRace = computed(() => {
 const playerAvatarUrl = computed(() => playerRace.value?.image_url ?? '')
 const playerRaceName = computed(() => playerRace.value?.name ?? '未记录的旅人')
 const globalStatus = computed(() => (
-  player.profile.value?.combat_statuses?.map((status) => status.name).join('、') || '状态正常'
+  exploration.sleeping.value
+    ? `睡眠中 · ${exploration.sleepRemainingSeconds.value}秒`
+    : player.profile.value?.combat_statuses?.map((status) => status.name).join('、') || '状态正常'
 ))
 const playerInitial = computed(() => player.profile.value?.name?.slice(0, 1) || '旅')
 const timeMoment = computed(() => {
