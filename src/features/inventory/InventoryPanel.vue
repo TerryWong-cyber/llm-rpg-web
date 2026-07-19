@@ -42,6 +42,7 @@
           <div v-if="item.tags.length" class="inventory-popover__tags"><span v-for="tag in item.tags" :key="tag">{{ tag }}</span></div>
           <button v-if="item.type === 'weapon' || item.type === 'armor'" class="button" :class="item.equipped ? 'button--ghost' : 'button--primary'" type="button" :disabled="player.busy.value" @click="toggleEquipment(item)">{{ item.equipped ? '卸下' : '装备' }}</button>
           <button v-if="item.type === 'item' && item.useContexts.includes('exploration')" class="button button--primary" type="button" :disabled="player.busy.value" @click="useItem(item)">在探索中使用</button>
+          <button v-if="item.type === 'item' && item.learnSkillId" class="button button--gold" type="button" :disabled="player.busy.value" @click="learnBook(item)">研读并学习</button>
         </aside>
       </InventorySlot>
     </div>
@@ -58,7 +59,7 @@ import { usePlayerStore } from '../../stores/player'
 import { useItemTransferStore } from '../../stores/itemTransfer'
 
 type InventoryTab = 'weapons' | 'armors' | 'items' | 'materials'
-interface ViewItem { id: string; type: ItemType; name: string; desc?: string; value: number; count: number; icon: string; imageUrl?: string; tradable: boolean; canBeIngredient: boolean; useContexts: ItemUseContext[]; category: string; tags: string[]; equipped: boolean }
+interface ViewItem { id: string; type: ItemType; name: string; desc?: string; value: number; count: number; icon: string; imageUrl?: string; tradable: boolean; canBeIngredient: boolean; useContexts: ItemUseContext[]; category: string; tags: string[]; equipped: boolean; learnSkillId?: string }
 
 const player = usePlayerStore()
 const catalog = useCatalogStore()
@@ -94,7 +95,7 @@ const items = computed<ViewItem[]>(() => {
   })
   if (activeTab.value === 'items') return Object.entries(inventory.items).flatMap(([id, count]) => {
     const item = catalog.itemSummary('item', id)
-    return item && count > 0 ? [{ id, type: 'item', name: item.name, desc: item.desc, value: item.value, count, icon: '⚗', imageUrl: item.imageUrl, equipped: false, ...policy(item) }] : []
+    return item && count > 0 ? [{ id, type: 'item', name: item.name, desc: item.desc, value: item.value, count, icon: item.category === 'skill_book' ? '📖' : '⚗', imageUrl: item.imageUrl, equipped: false, learnSkillId: catalog.meta.value?.items[id]?.learn_skill_id, ...policy(item) }] : []
   })
   return Object.entries(inventory.materials).flatMap(([id, count]) => {
     const item = catalog.itemSummary('material', id)
@@ -135,6 +136,13 @@ function contextLabel(contexts: ItemUseContext[]): string {
 
 async function useItem(item: ViewItem): Promise<void> {
   if (await player.useItem(item.id)) {
+    transfer.clear()
+    closeDetails()
+  }
+}
+
+async function learnBook(item: ViewItem): Promise<void> {
+  if (await player.learnSkillBook(item.id)) {
     transfer.clear()
     closeDetails()
   }

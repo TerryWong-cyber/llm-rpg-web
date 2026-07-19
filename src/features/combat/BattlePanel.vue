@@ -58,11 +58,8 @@
         <div v-else class="action-grid">
           <button type="button" :disabled="actionsDisabled" @click="combat.submitAction('0')"><span>⚔</span><strong>普通攻击</strong><small>不消耗资源</small></button>
           <button type="button" :disabled="actionsDisabled" @click="combat.submitAction('9')"><span>◈</span><strong>战术防御</strong><small>显著削弱对手攻击</small></button>
-          <button v-for="skill in me?.weapon?.skills" :key="skill.id" type="button" :disabled="actionsDisabled || !canUseSkill(skill.cost)" @click="combat.submitAction(skill.id)">
-            <span>✧</span><strong>{{ skill.name }}</strong><small>{{ skillCostLabel(skill.cost) }}</small>
-          </button>
-          <button v-for="skill in me?.raceSkills" :key="skill.id" class="race-action" type="button" :disabled="actionsDisabled || !canUseRaceSkill(skill)" @click="combat.submitAction(skill.id)">
-            <span>☽</span><strong>{{ skill.name }}</strong><small>种族专属 · {{ raceSkillCost(skill) }}</small>
+          <button v-for="skill in me?.skills" :key="skill.id" class="race-action" type="button" :disabled="actionsDisabled || !canUseSkill(skill)" :title="skill.description" @click="combat.submitAction(skill.id)">
+            <ItemIcon class="battle-skill-icon" :image-url="skill.icon_url" fallback="✧" /><strong>{{ skill.name }}</strong><small>{{ skillCostLabel(skill) }}</small>
           </button>
           <button type="button" :disabled="actionsDisabled" @click="showItems = true"><span>⚗</span><strong>使用物品</strong><small>{{ combatItems.length }} 种可用</small></button>
         </div>
@@ -141,20 +138,15 @@ function rounded(value?: number): number {
   return Math.round(value ?? 0)
 }
 
-function canUseSkill(cost: number): boolean {
-  return (me.value?.mp ?? 0) >= cost
+function canUseSkill(skill: SkillDefinition): boolean {
+  return (me.value?.mp ?? 0) >= (skill.costs?.mp ?? skill.cost ?? 0)
+    && (me.value?.stamina ?? 0) >= (skill.costs?.stamina ?? 0)
 }
 
-function skillCostLabel(cost: number): string {
-  return `消耗 ${cost} 魔力`
-}
-
-function canUseRaceSkill(skill: SkillDefinition): boolean {
-  return (me.value?.mp ?? 0) >= skill.cost
-}
-
-function raceSkillCost(skill: SkillDefinition): string {
-  return `${skill.cost} 魔力`
+function skillCostLabel(skill: SkillDefinition): string {
+  const costs = skill.costs ?? { mp: skill.cost ?? 0 }
+  const labels = [costs.mp ? `${costs.mp} 魔力` : '', costs.stamina ? `${costs.stamina} 精力` : '', costs.hp ? `${costs.hp} 生命` : ''].filter(Boolean)
+  return labels.length ? `消耗 ${labels.join(' / ')}` : '无消耗'
 }
 
 function damageSummary(damage: DamageBreakdown): string {

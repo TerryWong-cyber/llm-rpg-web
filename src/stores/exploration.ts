@@ -217,7 +217,7 @@ async function wake(): Promise<void> {
   }
 }
 
-async function resolveEventAction(eventId: string, actionId: string, itemId?: string): Promise<EventActionResponse | null> {
+async function resolveEventAction(eventId: string, actionId: string, itemId?: string, skillId?: string): Promise<EventActionResponse | null> {
   const playerId = usePlayerStore().playerId.value
   if (!playerId || !state.value || busy.value) return null
   busy.value = true
@@ -227,6 +227,7 @@ async function resolveEventAction(eventId: string, actionId: string, itemId?: st
       event_id: eventId,
       action_id: actionId,
       item_id: itemId,
+      skill_id: skillId,
     })
     applyMapState(response)
     return response

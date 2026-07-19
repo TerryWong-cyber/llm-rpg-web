@@ -41,7 +41,7 @@
                 <p>{{ eventParticipant.type === 'monster' ? eventParticipant.description : eventParticipant.public_backstory }}</p>
                 <div class="event-participant__facts">
                   <template v-if="eventParticipant.type === 'monster'">
-                    <span>生命 {{ eventParticipant.stats.hp }}</span><span>武器 {{ eventParticipant.equipment.weapon_name }}</span><span>护甲 {{ eventParticipant.equipment.armor_name }}</span>
+                    <span>{{ eventParticipant.rank === 'boss' ? '首领' : eventParticipant.rank === 'elite' ? '精英' : '普通' }} · 生命 {{ eventParticipant.stats.hp }}</span><span>武器 {{ eventParticipant.equipment.weapon_name }}</span><span>护甲 {{ eventParticipant.equipment.armor_name }}</span>
                     <span v-for="drop in eventParticipant.drops" :key="`${drop.item_type}:${drop.item_id}`">掉落 {{ dropName(drop.item_type, drop.item_id) }} · {{ Math.round(drop.chance * 100) }}%</span>
                   </template>
                   <template v-else>
@@ -61,7 +61,14 @@
                   </select>
                   <button class="button button--primary" type="button" :disabled="exploration.busy.value || !eventItemSelections[action.action_id]" @click="resolveEventAction(action.action_id, eventItemSelections[action.action_id])">{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
                 </div>
-                <button v-else-if="action.kind !== 'use_item'" class="button" :class="action.style === 'danger' ? 'button--danger-ghost' : action.style === 'primary' ? 'button--primary' : 'button--ghost'" type="button" :disabled="exploration.busy.value" @click="resolveEventAction(action.action_id)">{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
+                <div v-else-if="action.kind === 'use_skill' && action.eligible_skills.length" class="world-event__item-action">
+                  <select v-model="eventSkillSelections[action.action_id]" :disabled="exploration.busy.value">
+                    <option value="">选择可用技能</option>
+                    <option v-for="option in action.eligible_skills" :key="option.skill.id" :value="option.skill.id" :disabled="!option.available">{{ option.skill.name }}{{ option.available ? '' : ` · ${option.unavailable_reasons.join('、')}` }}</option>
+                  </select>
+                  <button class="button button--primary" type="button" :disabled="exploration.busy.value || !eventSkillSelections[action.action_id]" @click="resolveEventAction(action.action_id, undefined, eventSkillSelections[action.action_id])">{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
+                </div>
+                <button v-else-if="action.kind !== 'use_item' && action.kind !== 'use_skill'" class="button" :class="action.style === 'danger' ? 'button--danger-ghost' : action.style === 'primary' ? 'button--primary' : 'button--ghost'" type="button" :disabled="exploration.busy.value" @click="resolveEventAction(action.action_id)">{{ action.forced ? '必须 · ' : '' }}{{ action.label }}</button>
               </template>
             </div>
           </article>
@@ -159,6 +166,7 @@ const catalog = useCatalogStore()
 const combat = useCombatStore()
 const showHelp = ref(false)
 const eventItemSelections = ref<Record<string, string>>({})
+const eventSkillSelections = ref<Record<string, string>>({})
 const mapScroll = ref<HTMLElement | null>(null)
 
 watch(
@@ -343,10 +351,10 @@ function scrollPlayerIntoView(immediate = false): void {
     behavior: immediate || reduceMotion ? 'auto' : 'smooth',
   })
 }
-async function resolveEventAction(actionId: string, itemId?: string): Promise<void> {
+async function resolveEventAction(actionId: string, itemId?: string, skillId?: string): Promise<void> {
   const event = exploration.state.value?.event
   if (!event) return
-  const response = await exploration.resolveEventAction(event.event_id, actionId, itemId)
+  const response = await exploration.resolveEventAction(event.event_id, actionId, itemId, skillId)
   if (!response) return
   if (response.combat) {
     await combat.startEncounterBattle(response.combat)

@@ -2,7 +2,7 @@ import type { MapScale } from './common'
 import type { ResourceDefinition } from './catalog'
 import type { CombatStartResponse } from './combat'
 import type { PublicNpc, StoryHook } from './npc'
-import type { CombatStatus, ProgressionView, QuestProgress } from './player'
+import type { CombatStatus, ExplorationSkillEffect, ProgressionView, QuestProgress } from './player'
 
 export type MoveDirection = 'up' | 'down' | 'left' | 'right'
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter'
@@ -76,6 +76,7 @@ export interface TerrainDefinition {
   id: string
   name: string
   emoji: string
+  rank: 'normal' | 'elite' | 'boss'
   image_url?: string
   category: MapCell['terrain_category']
   tags: string[]
@@ -117,9 +118,16 @@ export interface WorldEventAction {
   action_id: string
   label: string
   style: 'primary' | 'quiet' | 'danger'
-  kind: 'narrative' | 'open_npc' | 'start_quest' | 'npc_combat' | 'monster_combat' | 'use_item'
+  kind: 'narrative' | 'open_npc' | 'start_quest' | 'npc_combat' | 'monster_combat' | 'use_item' | 'use_skill'
   forced: boolean
   eligible_items: EventItemOption[]
+  eligible_skills: EventSkillOption[]
+}
+
+export interface EventSkillOption {
+  skill: import('./catalog').SkillDefinition
+  available: boolean
+  unavailable_reasons: string[]
 }
 
 export interface EventItemOption {
@@ -231,6 +239,7 @@ export interface ExplorationPlayerState {
   stamina: number
   max_stamina: number
   combat_statuses: CombatStatus[]
+  exploration_effects: ExplorationSkillEffect[]
   inventory_items: Record<string, number>
   last_camped_game_day: number | null
   sleep: import('./player').SleepState | null
@@ -296,6 +305,7 @@ export interface EventActionRequest {
   event_id: string
   action_id: string
   item_id?: string
+  skill_id?: string
 }
 
 export interface GatherResponse extends MapStateResponse {

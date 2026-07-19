@@ -70,6 +70,7 @@ export interface CombatState {
   player_class: CharacterDefinition | null
   player_race: RaceDefinition | null
   player_race_skills: SkillDefinition[]
+  player_skills: SkillDefinition[]
   player_progression: ProgressionView
   player_weapon: WeaponDefinition | null
   player_armor: ArmorDefinition | null
@@ -90,6 +91,7 @@ export interface CombatState {
   ai_class: CharacterDefinition | null
   ai_race: RaceDefinition | null
   ai_race_skills: SkillDefinition[]
+  ai_skills: SkillDefinition[]
   ai_progression: ProgressionView | null
   ai_weapon: WeaponDefinition | null
   ai_armor: ArmorDefinition | null
@@ -161,6 +163,7 @@ export interface CombatantView {
   class: CharacterDefinition | null
   race: RaceDefinition | null
   raceSkills: SkillDefinition[]
+  skills: SkillDefinition[]
   weapon: WeaponDefinition | null
   armor: ArmorDefinition | null
   item: ConsumableDefinition | null

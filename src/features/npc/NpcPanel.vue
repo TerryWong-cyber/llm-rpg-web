@@ -22,7 +22,7 @@
       <div class="quest-journal__column">
         <header><p class="eyebrow">ACTIVE QUESTS</p><h3>进行中</h3></header>
         <article v-for="quest in world.journal.value?.active_quests ?? []" :key="quest.hook_id" class="journal-quest panel">
-          <header><div><h3>{{ quest.title }}</h3><p>{{ quest.summary }}</p></div><b>+{{ quest.xp_reward }} XP</b></header>
+          <header><div><h3>{{ quest.title }}</h3><p>{{ quest.summary }}</p><small v-if="quest.skill_rewards?.length">技能奖励 · {{ quest.skill_rewards.map(skillName).join('、') }}</small></div><b>+{{ quest.xp_reward }} XP</b></header>
           <div class="quest-related" v-if="quest.related_npcs?.length"><small>相关人物</small><span v-for="npc in quest.related_npcs" :key="npc.npc_id">{{ npc.name }}</span></div>
           <ul><li v-for="requirement in quest.requirements" :key="requirement.description" :class="{ done: requirement.completed }"><b>{{ requirement.completed ? '✓' : '○' }}</b><span>{{ requirement.description }}</span><small v-if="requirement.kind === 'inventory'">{{ requirement.current ?? 0 }} / {{ requirement.quantity ?? 1 }}</small></li></ul>
           <button class="button button--gold" type="button" :disabled="!quest.requirements.every((item) => item.completed) || player.busy.value" @click="completeQuest(quest.npc_id, quest.hook_id)">提交任务</button>
@@ -54,6 +54,16 @@
           <div class="npc-profile__copy"><p class="eyebrow">{{ world.selectedNpc.value.location.region }} · {{ world.selectedNpc.value.location.landmark }}</p><h2>{{ world.selectedNpc.value.name }}</h2><h3>{{ world.selectedNpc.value.title }}</h3><p>{{ world.selectedNpc.value.public_backstory }}</p><div class="tag-list"><span v-for="trait in world.selectedNpc.value.personality" :key="trait">{{ trait }}</span></div></div>
         </article>
         <div v-if="world.relationship.value" class="relationship-grid"><div><span>亲和</span><strong>{{ world.relationship.value.affinity }}</strong></div><div><span>信任</span><strong>{{ world.relationship.value.trust }}</strong></div><div><span>敬意</span><strong>{{ world.relationship.value.respect }}</strong></div><div class="hostile"><span>敌意</span><strong>{{ world.relationship.value.hostility }}</strong></div></div>
+        <article v-if="trainerOffers.length" class="panel trainer-panel">
+          <header><div><p class="eyebrow">SKILL MENTOR</p><h3>导师传授</h3></div><small>金币与学习条件均由服务器校验</small></header>
+          <div class="trainer-offers">
+            <section v-for="offer in trainerOffers" :key="offer.skill.id">
+              <ItemIcon :image-url="offer.skill.icon_url" fallback="✦" />
+              <span><strong>{{ offer.skill.name }}</strong><small>{{ offer.skill.description }}</small><em v-if="offer.unavailable_reasons.length">{{ offer.unavailable_reasons.join('；') }}</em></span>
+              <button class="button button--gold" type="button" :disabled="offer.learned || !offer.available || player.busy.value" @click="learnFromTrainer(offer.skill.id)">{{ offer.learned ? '已习得' : `${offer.gold_cost} 金币` }}</button>
+            </section>
+          </div>
+        </article>
         <div class="dialogue-layout">
           <section class="dialogue panel">
             <div class="dialogue__log" aria-live="polite"><div v-if="!world.dialogueLog.value.length" class="dialogue__opening"><p>“{{ world.selectedNpc.value.conversation_style }}”</p><small>你们尚无聊天记录。</small></div><article v-for="(line, index) in world.dialogueLog.value" :key="index" class="dialogue-line" :class="`dialogue-line--${line.role}`"><small>{{ line.role === 'player' ? '你' : world.selectedNpc.value.name }}<template v-if="line.tone"> · {{ line.tone }}</template></small><p>{{ line.text }}</p></article></div>
@@ -69,8 +79,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import * as gameApi from '../../api/game'
+import type { TrainerSkillOffer } from '../../contracts'
+import ItemIcon from '../../components/ui/ItemIcon.vue'
 import { useCombatStore } from '../../stores/combat'
+import { useCatalogStore } from '../../stores/catalog'
 import { useExplorationStore } from '../../stores/exploration'
 import { usePlayerStore } from '../../stores/player'
 import { useWorldStore } from '../../stores/world'
@@ -79,9 +93,11 @@ type JournalTab = 'events' | 'quests' | 'people'
 const world = useWorldStore()
 const player = usePlayerStore()
 const combat = useCombatStore()
+const catalog = useCatalogStore()
 const exploration = useExplorationStore()
 const activeTab = ref<JournalTab>('events')
 const message = ref('')
+const trainerOffers = ref<TrainerSkillOffer[]>([])
 const tabs = computed(() => [
   { id: 'events' as const, label: '事件', count: world.journal.value?.events.length ?? 0 },
   { id: 'quests' as const, label: '任务', count: world.journal.value?.active_quests.length ?? 0 },
@@ -91,9 +107,21 @@ const tabs = computed(() => [
 function initials(name: string): string { return name.trim().slice(0, 2) || '？' }
 function eventPhase(phase: string): string { return ({ triggered: '事件发生', action: '采取行动', expired: '事件结束' } as Record<string, string>)[phase] ?? '事件记录' }
 function regionName(id: string): string { return exploration.state.value?.world.regions[id]?.name ?? id }
+function skillName(id: string): string { return catalog.meta.value?.skills[id]?.name ?? id }
 async function send(): Promise<void> { const text = message.value.trim(); if (!text) return; message.value = ''; await world.talk(text) }
 async function beginBattle(): Promise<void> { const response = await world.beginCombat(); if (response) await combat.startNpcBattle(response) }
 async function completeQuest(npcId: string, hookId: string): Promise<void> { if (await player.completeQuest(npcId, hookId)) await world.loadWorld() }
+async function loadTrainer(npcId?: string): Promise<void> {
+  if (!npcId || !player.playerId.value) { trainerOffers.value = []; return }
+  try { trainerOffers.value = (await gameApi.getTrainerSkills(player.playerId.value, npcId)).offers }
+  catch { trainerOffers.value = [] }
+}
+async function learnFromTrainer(skillId: string): Promise<void> {
+  const npcId = world.selectedNpc.value?.npc_id
+  if (npcId && await player.learnTrainerSkill(npcId, skillId)) await loadTrainer(npcId)
+}
+
+watch(() => world.selectedNpc.value?.npc_id, (npcId) => { void loadTrainer(npcId) })
 
 onMounted(async () => {
   await world.loadWorld()

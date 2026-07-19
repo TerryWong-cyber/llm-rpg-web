@@ -49,6 +49,19 @@ function normalizeSkills(value: unknown): SkillDefinition[] {
   return value.map((skill) => ({ ...skill, id: String(skill.id) })) as SkillDefinition[]
 }
 
+function normalizeSkill(value: Record<string, unknown>, id: string): SkillDefinition {
+  return {
+    ...value,
+    id,
+    description: String(value.description ?? value.desc ?? ''),
+    icon_url: String(value.icon_url ?? ''),
+    use_contexts: Array.isArray(value.use_contexts) ? value.use_contexts as SkillDefinition['use_contexts'] : [],
+    tags: Array.isArray(value.tags) ? value.tags.map(String) : [],
+    costs: typeof value.costs === 'object' && value.costs ? value.costs as SkillDefinition['costs'] : {},
+    effects: Array.isArray(value.effects) ? value.effects as SkillDefinition['effects'] : [],
+  } as SkillDefinition
+}
+
 function normalizeCraftingFlag(value: Record<string, unknown>): boolean {
   return value.can_be_ingredient !== false
 }
@@ -96,6 +109,7 @@ export function normalizeGameMeta(raw: unknown): GameMeta {
       id,
       ...normalizeItemPolicy(value, 'material'),
     }) as ResourceDefinition),
+    skills: normalizeRecord(meta.skills, normalizeSkill),
   }
 }
 
@@ -105,6 +119,7 @@ export function normalizeProfile(profile: PlayerProfile): PlayerProfile {
     player_id: String(profile.player_id),
     character_id: String(profile.character_id),
     race_id: String(profile.race_id ?? '1'),
+    created_at: profile.created_at ?? new Date(0).toISOString(),
     level: Number(profile.level ?? 1),
     experience: Number(profile.experience ?? 0),
     experience_to_next: Number(profile.experience_to_next ?? 100),
@@ -121,6 +136,10 @@ export function normalizeProfile(profile: PlayerProfile): PlayerProfile {
     completed_quests: profile.completed_quests ?? [],
     quest_history: profile.quest_history ?? {},
     encountered_npc_ids: profile.encountered_npc_ids ?? [],
+    learned_skills: profile.learned_skills ?? {},
+    equipped_skill_ids: (profile.equipped_skill_ids ?? []).map(String),
+    exploration_effects: profile.exploration_effects ?? [],
+    chronicle: profile.chronicle ?? [],
     inventory: normalizeInventory(profile.inventory),
     current_hp: Number(profile.current_hp ?? 1),
     max_hp: Number(profile.max_hp ?? profile.current_hp ?? 1),
@@ -175,6 +194,18 @@ export function normalizeMapState(response: MapStateResponse): MapStateResponse 
     map_grid: mapGrid,
     inventory_materials: normalizeQuantityMap(response.inventory_materials),
     event_log: response.event_log ?? [],
+    player: {
+      ...response.player,
+      exploration_effects: response.player.exploration_effects ?? [],
+    },
+    event: response.event ? {
+      ...response.event,
+      actions: (response.event.actions ?? []).map((action) => ({
+        ...action,
+        eligible_items: action.eligible_items ?? [],
+        eligible_skills: action.eligible_skills ?? [],
+      })),
+    } : null,
   }
 }
 
@@ -210,6 +241,7 @@ export function normalizeCombatSnapshot(snapshot: CombatSnapshot): CombatSnapsho
         ? { ...snapshot.state.player_race, id: String(snapshot.state.player_race.id), exclusive_skills: normalizeSkills(snapshot.state.player_race.exclusive_skills) }
         : null,
       player_race_skills: normalizeSkills(snapshot.state.player_race_skills),
+      player_skills: normalizeSkills(snapshot.state.player_skills),
       player_weapon: normalizeWeapon(snapshot.state.player_weapon),
       player_armor: normalizeArmor(snapshot.state.player_armor),
       player_item: normalizeItem(snapshot.state.player_item),
@@ -226,6 +258,7 @@ export function normalizeCombatSnapshot(snapshot: CombatSnapshot): CombatSnapsho
         ? { ...snapshot.state.ai_race, id: String(snapshot.state.ai_race.id), exclusive_skills: normalizeSkills(snapshot.state.ai_race.exclusive_skills) }
         : null,
       ai_race_skills: normalizeSkills(snapshot.state.ai_race_skills),
+      ai_skills: normalizeSkills(snapshot.state.ai_skills),
       ai_weapon: normalizeWeapon(snapshot.state.ai_weapon),
       ai_armor: normalizeArmor(snapshot.state.ai_armor),
       ai_item: normalizeItem(snapshot.state.ai_item),

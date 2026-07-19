@@ -29,9 +29,21 @@ export interface CharacterDefinition {
 export interface SkillDefinition {
   id: CatalogId
   name: string
-  cost: number
-  multiplier: number
-  desc: string
+  description?: string
+  type?: 'damage' | 'defense' | 'healing' | 'buff' | 'control' | 'utility' | 'passive'
+  icon_url?: string
+  rarity?: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+  active?: boolean
+  use_contexts?: ItemUseContext[]
+  tags?: string[]
+  costs?: Partial<Record<'hp' | 'mp' | 'stamina', number>>
+  effect_range?: 'self' | 'single' | 'area' | 'all_enemies' | 'event'
+  cast_conditions?: SkillConditions
+  learning_conditions?: SkillConditions
+  effects?: SkillEffect[]
+  cost?: number
+  multiplier?: number
+  desc?: string
   status_effect?: string
   status_chance?: number
   mp_cost?: number
@@ -39,6 +51,31 @@ export interface SkillDefinition {
   self_effect?: string
   self_effect_ratio?: number
   resource?: 'stamina' | 'mp'
+}
+
+export interface SkillConditions {
+  race_ids: string[]
+  minimum_level: number
+  minimum_attributes: Record<string, number>
+  prerequisite_skill_ids: string[]
+  required_weapon_types: string[]
+  required_states: string[]
+}
+
+export interface SkillEffect {
+  kind: 'damage' | 'heal' | 'shield' | 'apply_status' | 'clear_status' | 'grant_exploration_state' | 'event_capability'
+  target: 'self' | 'enemy' | 'all_enemies' | 'event'
+  damage_type?: 'physical' | 'magical' | 'true' | 'elemental' | null
+  element?: string | null
+  fixed_amount: number
+  attribute_scaling: Record<string, number>
+  weapon_multiplier: number
+  status_id?: string | null
+  chance: number
+  duration_turns?: number | null
+  state_id?: string | null
+  duration_seconds?: number | null
+  capability?: string | null
 }
 
 export interface RaceDefinition {
@@ -102,7 +139,7 @@ export interface ArmorDefinition extends ItemPolicyFields {
 export interface ConsumableDefinition extends ItemPolicyFields {
   id: CatalogId
   name: string
-  type: 'heal_hp' | 'heal_mp' | 'heal_both' | 'dmg'
+  type: 'heal_hp' | 'heal_mp' | 'heal_both' | 'dmg' | 'learn_skill'
   val: number
   stamina_restore?: number
   damage_type?: 'physical' | 'magical' | 'true'
@@ -120,6 +157,7 @@ export interface ConsumableDefinition extends ItemPolicyFields {
   value: number
   desc: string
   image_url?: string
+  learn_skill_id?: string
 }
 
 export interface ResourceDefinition extends ItemPolicyFields {
@@ -140,4 +178,13 @@ export interface GameMeta {
   armors: Record<CatalogId, ArmorDefinition>
   items: Record<CatalogId, ConsumableDefinition>
   resources: Record<CatalogId, ResourceDefinition>
+  skills: Record<CatalogId, SkillDefinition>
+}
+
+export interface TrainerSkillOffer {
+  skill: SkillDefinition
+  gold_cost: number
+  learned: boolean
+  available: boolean
+  unavailable_reasons: string[]
 }

@@ -11,6 +11,7 @@ import type {
   TradeResponse,
   UseItemResponse,
   EquipmentRequest,
+  TrainerSkillOffer,
 } from '../contracts'
 import { apiRequest } from './client'
 import { normalizeCombatSnapshot, normalizeGameMeta, normalizeProfile } from './normalizers'
@@ -28,6 +29,14 @@ export async function createCharacter(payload: CreateCharacterRequest): Promise<
     body: payload,
   })
   return { ...response, player_id: String(response.player_id), profile: normalizeProfile(response.profile) }
+}
+
+export async function getProfile(playerId: string): Promise<ProfileUpdateResponse> {
+  const response = await apiRequest<ProfileUpdateResponse>('/api/game/character/profile', {
+    cache: 'no-store',
+    query: { player_id: playerId },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
 }
 
 export async function allocateAttributes(
@@ -82,6 +91,40 @@ export async function useItem(playerId: string, itemId: string): Promise<UseItem
   const response = await apiRequest<UseItemResponse>('/api/game/use-item', {
     method: 'POST',
     body: { player_id: playerId, item_id: itemId },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
+export async function equipSkills(playerId: string, skillIds: string[]): Promise<ProfileUpdateResponse> {
+  const response = await apiRequest<ProfileUpdateResponse>('/api/game/skills/equip', {
+    method: 'POST', body: { player_id: playerId, skill_ids: skillIds },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
+export async function learnSkillBook(playerId: string, itemId: string): Promise<ProfileUpdateResponse & { skill_id: string }> {
+  const response = await apiRequest<ProfileUpdateResponse & { skill_id: string }>('/api/game/skills/learn-book', {
+    method: 'POST', body: { player_id: playerId, item_id: itemId },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
+export async function castExplorationSkill(playerId: string, skillId: string): Promise<ProfileUpdateResponse & { outcome: { skill_id: string; applied_states: string[] } }> {
+  const response = await apiRequest<ProfileUpdateResponse & { outcome: { skill_id: string; applied_states: string[] } }>('/api/game/skills/cast-exploration', {
+    method: 'POST', body: { player_id: playerId, skill_id: skillId },
+  })
+  return { ...response, profile: normalizeProfile(response.profile) }
+}
+
+export function getTrainerSkills(playerId: string, npcId: string): Promise<{ npc_id: string; offers: TrainerSkillOffer[] }> {
+  return apiRequest(`/api/game/skills/trainer/${encodeURIComponent(npcId)}`, {
+    cache: 'no-store', query: { player_id: playerId, _refresh: Date.now() },
+  })
+}
+
+export async function learnTrainerSkill(playerId: string, npcId: string, skillId: string): Promise<ProfileUpdateResponse> {
+  const response = await apiRequest<ProfileUpdateResponse>('/api/game/skills/learn-trainer', {
+    method: 'POST', body: { player_id: playerId, npc_id: npcId, skill_id: skillId },
   })
   return { ...response, profile: normalizeProfile(response.profile) }
 }

@@ -6,6 +6,7 @@ export interface PlayerProfile {
   name: string
   character_id: string
   race_id: string
+  created_at: string
   level: number
   experience: number
   experience_to_next: number
@@ -35,6 +36,44 @@ export interface PlayerProfile {
   last_stamina_recovery_game_hour?: number | null
   sleep?: SleepState | null
   encountered_npc_ids?: string[]
+  learned_skills: Record<string, LearnedSkill>
+  equipped_skill_ids: string[]
+  exploration_effects: ExplorationSkillEffect[]
+  chronicle: CharacterChronicleEntry[]
+}
+
+export type ChronicleCategory = 'origin' | 'growth' | 'skill' | 'quest' | 'exploration' | 'combat'
+
+export interface CharacterChronicleEntry {
+  entry_id: string
+  category: ChronicleCategory
+  title: string
+  description: string
+  emoji: string
+  source_id?: string | null
+  game_hour?: number | null
+  year?: number | null
+  month?: number | null
+  day?: number | null
+  hour?: number | null
+  occurred_at: string
+  details: Record<string, unknown>
+}
+
+export interface LearnedSkill {
+  skill_id: string
+  source: 'starter' | 'skill_book' | 'npc' | 'race_level' | 'quest' | 'admin'
+  source_id?: string | null
+  learned_at: string
+}
+
+export interface ExplorationSkillEffect {
+  state_id: string
+  name: string
+  source_skill_id: string
+  started_at: string
+  expires_at: string
+  capabilities: string[]
 }
 
 export interface SleepState {
@@ -74,6 +113,7 @@ export interface QuestProgress {
   title: string
   summary: string
   xp_reward: number
+  skill_rewards?: string[]
   requirements: QuestRequirement[]
   related_npc_ids?: string[]
   related_npcs?: import('./npc').PublicNpc[]
@@ -112,7 +152,7 @@ export interface ProfileUpdateResponse {
   status: 'success'
   profile: PlayerProfile
   progression?: ProgressionView
-  reward?: { experience: number; levels_gained: number; level: number; attribute_points: number }
+  reward?: { experience: number; levels_gained: number; level: number; attribute_points: number; unlocked_skills?: string[] }
 }
 
 export interface ItemUseOutcome {

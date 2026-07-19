@@ -124,7 +124,10 @@ async function completeQuest(npcId: string, hookId: string): Promise<boolean> {
     replaceProfile(response.profile)
     const reward = response.reward
     const levelText = reward?.levels_gained ? `，提升至 ${reward.level} 级` : ''
-    useNotificationsStore().show(`任务完成，获得 ${reward?.experience ?? 0} 经验${levelText}。`, 'success')
+    const skillText = reward?.unlocked_skills?.length
+      ? `，习得 ${reward.unlocked_skills.map((id) => useCatalogStore().meta.value?.skills[id]?.name ?? id).join('、')}`
+      : ''
+    useNotificationsStore().show(`任务完成，获得 ${reward?.experience ?? 0} 经验${levelText}${skillText}。`, 'success')
     return true
   } catch (error) {
     useNotificationsStore().capture(error, '任务目标尚未全部满足。')
@@ -217,6 +220,78 @@ async function useItem(itemId: string): Promise<boolean> {
   }
 }
 
+async function learnSkillBook(itemId: string): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.learnSkillBook(playerId.value, itemId)
+    replaceProfile(response.profile)
+    const skill = useCatalogStore().meta.value?.skills[response.skill_id]
+    useNotificationsStore().show(`已习得「${skill?.name ?? response.skill_id}」。`, 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '技能书研读失败。', true)
+    return false
+  } finally { busy.value = false }
+}
+
+async function equipSkills(skillIds: string[], notify = true): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.equipSkills(playerId.value, skillIds)
+    replaceProfile(response.profile)
+    if (notify) useNotificationsStore().show('战斗技能配置已保存。', 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '无法保存技能配置。', true)
+    return false
+  } finally { busy.value = false }
+}
+
+async function refreshProfile(): Promise<boolean> {
+  if (!playerId.value || busy.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.getProfile(playerId.value)
+    replaceProfile(response.profile)
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '角色档案刷新失败。')
+    return false
+  } finally { busy.value = false }
+}
+
+async function castExplorationSkill(skillId: string): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.castExplorationSkill(playerId.value, skillId)
+    replaceProfile(response.profile)
+    const skill = useCatalogStore().meta.value?.skills[skillId]
+    useNotificationsStore().show(`已释放「${skill?.name ?? skillId}」。`, 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '当前无法释放该技能。', true)
+    return false
+  } finally { busy.value = false }
+}
+
+async function learnTrainerSkill(npcId: string, skillId: string): Promise<boolean> {
+  if (!playerId.value) return false
+  busy.value = true
+  try {
+    const response = await gameApi.learnTrainerSkill(playerId.value, npcId, skillId)
+    replaceProfile(response.profile)
+    const skill = useCatalogStore().meta.value?.skills[skillId]
+    useNotificationsStore().show(`导师传授了「${skill?.name ?? skillId}」。`, 'success')
+    return true
+  } catch (error) {
+    useNotificationsStore().capture(error, '暂时无法向导师学习。', true)
+    return false
+  } finally { busy.value = false }
+}
+
 function syncExploration(
   map: MapInstance,
   materials: Record<string, number>,
@@ -233,6 +308,7 @@ function syncExploration(
     stamina: explorationPlayer?.stamina ?? profile.value.stamina,
     max_stamina: explorationPlayer?.max_stamina ?? profile.value.max_stamina,
     combat_statuses: explorationPlayer?.combat_statuses ?? profile.value.combat_statuses,
+    exploration_effects: explorationPlayer?.exploration_effects ?? profile.value.exploration_effects,
     last_camped_game_day: explorationPlayer?.last_camped_game_day ?? profile.value.last_camped_game_day,
     sleep: explorationPlayer?.sleep ?? profile.value.sleep,
     ...(explorationPlayer?.progression ?? {}),
@@ -294,6 +370,11 @@ export function usePlayerStore() {
     tradeItem,
     craftItems,
     useItem,
+    learnSkillBook,
+    equipSkills,
+    castExplorationSkill,
+    learnTrainerSkill,
+    refreshProfile,
     syncExploration,
     syncCombat,
   }
