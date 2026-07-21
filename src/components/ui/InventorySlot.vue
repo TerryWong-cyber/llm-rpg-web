@@ -9,6 +9,7 @@
       :aria-expanded="active"
       :draggable="draggable"
       @click.stop="emit('toggle')"
+      @dblclick.stop="emit('doubleclick')"
       @dragstart="emit('dragstart', $event)"
       @dragend="emit('dragend')"
     >
@@ -29,7 +30,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const props = withDefaults(defineProps<{ active: boolean; name: string; count: number; icon: string; imageUrl?: string; equipped?: boolean; selected?: boolean; draggable?: boolean }>(), { draggable: false, selected: false })
-const emit = defineEmits<{ toggle: []; preview: []; dragstart: [event: DragEvent]; dragend: [] }>()
+const emit = defineEmits<{ toggle: []; doubleclick: []; preview: []; dragstart: [event: DragEvent]; dragend: [] }>()
 const anchor = ref<HTMLElement | null>(null)
 const floating = ref<HTMLElement | null>(null)
 const position = ref({ top: 0, left: 0, width: 300 })

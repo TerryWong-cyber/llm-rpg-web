@@ -183,6 +183,12 @@ async function craftItems(
     if (response.status === 'success') {
       catalog.rememberCraftResult(response.result)
       await catalog.loadCatalog(true)
+      try {
+        const latest = await gameApi.getProfile(playerId.value)
+        replaceProfile(latest.profile)
+      } catch {
+        useNotificationsStore().show('炼金已完成，但行囊状态暂未能再次校验。', 'warning')
+      }
       useNotificationsStore().show(`炼成「${response.result.name}」。`, 'success')
     } else {
       useNotificationsStore().show(response.failure_reason, 'warning')

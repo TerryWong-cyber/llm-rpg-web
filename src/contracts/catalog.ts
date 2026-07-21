@@ -118,6 +118,7 @@ export interface WeaponDefinition extends ItemPolicyFields {
   value: number
   desc: string
   image_url?: string
+  image_key?: string
   skills: SkillDefinition[]
 }
 
@@ -134,6 +135,7 @@ export interface ArmorDefinition extends ItemPolicyFields {
   value: number
   desc: string
   image_url?: string
+  image_key?: string
 }
 
 export interface ConsumableDefinition extends ItemPolicyFields {
@@ -157,6 +159,7 @@ export interface ConsumableDefinition extends ItemPolicyFields {
   value: number
   desc: string
   image_url?: string
+  image_key?: string
   learn_skill_id?: string
 }
 
@@ -169,6 +172,7 @@ export interface ResourceDefinition extends ItemPolicyFields {
   value: number
   desc?: string
   image_url?: string
+  image_key?: string
 }
 
 export interface GameMeta {

@@ -1,5 +1,6 @@
 import { computed, readonly, ref } from 'vue'
 import { getGameMeta, getRecipes } from '../api/game'
+import { imageUrlFor } from '../assets/craftImageCache'
 import type { CraftResult, GameMeta, ItemType, ItemUseContext, RecipeRecord } from '../contracts'
 import { useNotificationsStore } from './notifications'
 
@@ -10,6 +11,7 @@ export interface CatalogItemSummary {
   desc: string
   value: number
   imageUrl?: string
+  imageKey?: string
   emoji?: string
   canBeIngredient: boolean
   tradable: boolean
@@ -69,7 +71,8 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         name: item.name,
         desc: item.desc,
         value: item.value,
-        imageUrl: item.image_url,
+        imageUrl: imageUrlFor(item.image_url, item.image_key),
+        imageKey: item.image_key,
         ...policySummary(item),
       }
     } else if (itemType === 'armor') {
@@ -80,7 +83,8 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         name: item.name,
         desc: item.desc,
         value: item.value,
-        imageUrl: item.image_url,
+        imageUrl: imageUrlFor(item.image_url, item.image_key),
+        imageKey: item.image_key,
         ...policySummary(item),
       }
     } else if (itemType === 'item') {
@@ -91,7 +95,8 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         name: item.name,
         desc: item.desc,
         value: item.value,
-        imageUrl: item.image_url,
+        imageUrl: imageUrlFor(item.image_url, item.image_key),
+        imageKey: item.image_key,
         ...policySummary(item),
       }
     } else {
@@ -102,7 +107,8 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
         name: item.name,
         desc: item.desc ?? '',
         value: item.value,
-        imageUrl: item.image_url,
+        imageUrl: imageUrlFor(item.image_url, item.image_key),
+        imageKey: item.image_key,
         emoji: item.emoji,
         ...policySummary(item),
       }
@@ -116,7 +122,8 @@ function itemSummary(itemType: ItemType, itemId: string): CatalogItemSummary | n
     name: crafted.name,
     desc: crafted.desc,
     value: crafted.value,
-    imageUrl: crafted.image_url,
+    imageUrl: imageUrlFor(crafted.image_url, crafted.image_key),
+    imageKey: crafted.image_key,
     emoji: itemType === 'material' ? '✦' : undefined,
     ...policySummary(crafted),
   }

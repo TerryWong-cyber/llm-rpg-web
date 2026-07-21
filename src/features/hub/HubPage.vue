@@ -19,7 +19,7 @@
     <div v-if="windows.length" class="workspace-windows" aria-label="已打开的功能窗口">
       <WorkspaceWindow v-if="isOpen('growth')" title="角色成长" eyebrow="CHARACTER GROWTH" @close="closeWindow('growth')"><GrowthPanel @inventory="openWindow('inventory')" /></WorkspaceWindow>
       <WorkspaceWindow v-if="isOpen('tasks')" title="任务与事件" eyebrow="QUESTS & EVENTS" @close="closeWindow('tasks')"><NpcPanel /></WorkspaceWindow>
-      <WorkspaceWindow v-if="isOpen('inventory')" title="旅人行囊" eyebrow="TRAVELER'S SATCHEL" @close="closeWindow('inventory')"><InventoryPanel /></WorkspaceWindow>
+      <WorkspaceWindow v-if="isOpen('inventory')" title="旅人行囊" eyebrow="TRAVELER'S SATCHEL" @close="closeWindow('inventory')"><InventoryPanel :crafting-open="isOpen('craft')" /></WorkspaceWindow>
       <WorkspaceWindow v-if="isOpen('craft')" title="星辉炼金" eyebrow="ALCHEMY" @close="closeWindow('craft')"><CraftingPanel /></WorkspaceWindow>
       <WorkspaceWindow v-if="isOpen('shop')" title="鎏金集市" eyebrow="GILDED CROSSROADS" @close="closeWindow('shop')"><ShopPanel /></WorkspaceWindow>
       <WorkspaceWindow v-if="isOpen('battle')" title="战备大厅" eyebrow="HALL OF CHALLENGES" @close="closeWindow('battle')"><RoomPanel /></WorkspaceWindow>

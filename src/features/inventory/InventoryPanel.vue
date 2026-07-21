@@ -27,6 +27,7 @@
         draggable
         @preview="activeItemKey = `${item.type}-${item.id}`"
         @toggle="selectItem(item)"
+        @doubleclick="quickAddToCraft(item)"
         @dragstart="transfer.beginDrag(item, $event.dataTransfer)"
         @dragend="transfer.endDrag"
       >
@@ -43,6 +44,7 @@
           <button v-if="item.type === 'weapon' || item.type === 'armor'" class="button" :class="item.equipped ? 'button--ghost' : 'button--primary'" type="button" :disabled="player.busy.value" @click="toggleEquipment(item)">{{ item.equipped ? '卸下' : '装备' }}</button>
           <button v-if="item.type === 'item' && item.useContexts.includes('exploration')" class="button button--primary" type="button" :disabled="player.busy.value" @click="useItem(item)">在探索中使用</button>
           <button v-if="item.type === 'item' && item.learnSkillId" class="button button--gold" type="button" :disabled="player.busy.value" @click="learnBook(item)">研读并学习</button>
+          <button v-if="props.craftingOpen && item.canBeIngredient" class="button button--gold" type="button" @click="quickAddToCraft(item)">放入合成</button>
         </aside>
       </InventorySlot>
     </div>
@@ -57,13 +59,16 @@ import InventorySlot from '../../components/ui/InventorySlot.vue'
 import { useCatalogStore, type CatalogItemSummary } from '../../stores/catalog'
 import { usePlayerStore } from '../../stores/player'
 import { useItemTransferStore } from '../../stores/itemTransfer'
+import { useNotificationsStore } from '../../stores/notifications'
 
 type InventoryTab = 'weapons' | 'armors' | 'items' | 'materials'
 interface ViewItem { id: string; type: ItemType; name: string; desc?: string; value: number; count: number; icon: string; imageUrl?: string; tradable: boolean; canBeIngredient: boolean; useContexts: ItemUseContext[]; category: string; tags: string[]; equipped: boolean; learnSkillId?: string }
 
+const props = defineProps<{ craftingOpen?: boolean }>()
 const player = usePlayerStore()
 const catalog = useCatalogStore()
 const transfer = useItemTransferStore()
+const notifications = useNotificationsStore()
 const selectedTransfer = computed(() => transfer.selected.value)
 const activeTab = ref<InventoryTab>('weapons')
 const activeItemKey = ref('')
@@ -124,6 +129,25 @@ function selectItem(item: ViewItem): void {
   const key = `${item.type}-${item.id}`
   transfer.select(item)
   activeItemKey.value = activeItemKey.value === key ? '' : key
+}
+
+function quickAddToCraft(item: ViewItem): void {
+  if (!props.craftingOpen || !item.canBeIngredient) return
+  const outcome = transfer.addCraftIngredient(item)
+  const failures = {
+    full: '炼金槽已满，请先取下已有原料。',
+    forbidden: '这件物品不可作为炼金原料。',
+    equipped: '正在装备的物品需先卸下。',
+    unavailable: '该物品已全部放入炼金台。',
+    reserve: `必须保留一件${item.type === 'weapon' ? '武器' : '护甲'}。`,
+  } as const
+  if (outcome !== 'added') {
+    notifications.show(failures[outcome], 'warning')
+    return
+  }
+  transfer.clear()
+  closeDetails()
+  notifications.show(`已将「${item.name}」放入炼金槽。`, 'success')
 }
 
 function closeDetails(): void { activeItemKey.value = '' }

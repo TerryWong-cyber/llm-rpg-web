@@ -1,12 +1,9 @@
-// const DEFAULT_HTTP_ORIGIN = 'http://192.168.3.67:8008' //局域网内调试
-const DEFAULT_HTTP_ORIGIN = 'https:game.toolup.cn'
-
 function withoutTrailingSlash(value: string): string {
   return value.replace(/\/+$/, '')
 }
 
 export const apiOrigin = withoutTrailingSlash(
-  import.meta.env.VITE_RPG_API_BASE || DEFAULT_HTTP_ORIGIN,
+  import.meta.env.VITE_RPG_API_BASE,
 )
 
 function deriveSocketOrigin(httpOrigin: string): string {
@@ -20,6 +17,18 @@ function deriveSocketOrigin(httpOrigin: string): string {
 export const socketOrigin = withoutTrailingSlash(
   import.meta.env.VITE_RPG_WS_BASE || deriveSocketOrigin(apiOrigin),
 )
+
+export const ossOrigin = withoutTrailingSlash(
+  import.meta.env.VITE_RPG_OSS_BASE,
+)
+
+export const ossBucket = import.meta.env.VITE_RPG_OSS_BUCKET || ''
+
+export function resolveOssFileUrl(imageKey: string): string {
+  if (!imageKey || !ossBucket) return ''
+  const encodedKey = imageKey.split('/').map(encodeURIComponent).join('/')
+  return `${ossOrigin}/file/${encodeURIComponent(ossBucket)}/${encodedKey}`
+}
 
 export function resolveSocketUrl(pathOrUrl: string): string {
   if (/^wss?:\/\//i.test(pathOrUrl)) return pathOrUrl

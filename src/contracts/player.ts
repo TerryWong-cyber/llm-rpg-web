@@ -213,17 +213,22 @@ export interface CraftResult {
   type: ItemType
   combat_stat: number
   image_url: string
+  image_key: string
+  image_status: 'generated' | 'fallback' | null
   can_be_ingredient: boolean
   tradable: boolean
   use_contexts: Array<'combat' | 'exploration' | 'world_event'>
   category: string
   tags: string[]
+  properties: Record<string, string | number | boolean>
 }
 
 export interface CraftSuccessResponse {
   status: 'success'
   result: CraftResult
   failure_reason: ''
+  duration_ms: number
+  recipe_cached: boolean
   profile: PlayerProfile
 }
 
@@ -231,6 +236,8 @@ export interface CraftFailureResponse {
   status: 'failed'
   result: null
   failure_reason: string
+  duration_ms: number
+  recipe_cached: boolean
   profile: PlayerProfile
 }
 
@@ -248,6 +255,7 @@ export interface RecipeRecord {
   success: boolean
   result: CraftResult | null
   failure_reason: string
+  duration_ms: number
 }
 
 export interface RecipesResponse {
